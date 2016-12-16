@@ -42,6 +42,27 @@ json {
 Usage
 -----
 Define your models in /src/main/json/{the package you want the model to live in}. The gradle task will create the models for you at build time.
+An example json file is below.
+```json
+{
+  "public": false, // Not required, defaults to false.
+  "createSerializer": true, // Not required, defaults to false.
+  "createDeserializer": false, // Not required, defaults to false.
+  "useAutoValue": true, // Not required, defaults to false.
+  "fields": [
+    {
+      "name": "foo", // Required!
+      "type": "String", // Required!
+      "public": false, // Not required, defaults to the types public flag.
+      "jsonName": "foo", // Not required, defaults to the "name" property.
+      "isList": false, // Not required, defaults to false.
+      "required": true, // Not required, defaults to true if object, defaults to false if primitive.
+      "customSerializer": null, // Not required.
+      "customDeserializer": null // Not required.
+    }
+  ]
+}
+```
 
 Custom Serializers/Deserializers
 --------------------------------
@@ -102,6 +123,7 @@ Upcoming Features
 -----------------
 - Better error messages - Please report difficult to understand errors!
 - Easier model definition using code DSL
+- Better documentation - Please report areas that need more/better documentation!
 
 Local Development Tips
 ----------------------
