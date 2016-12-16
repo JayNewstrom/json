@@ -104,7 +104,7 @@ Add the retrofit dependency to your `build.gradle`.
 ```groovy
 dependencies {
     ...
-    compile 'com.jaynewstrom.json:retrofit-converter:0.8.0-SNAPSHOT'
+    compile 'com.jaynewstrom.json:retrofit-converter:0.8.0'
 }
 ```
 
