@@ -1,5 +1,4 @@
-include 'integration-tests'
-include 'gradle-plugin'
-include 'compiler'
-include 'runtime'
-include 'retrofit-converter'
+rootProject.name = 'json'
+
+includeBuild 'plugin'
+includeBuild 'tests'

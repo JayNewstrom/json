@@ -125,11 +125,9 @@ Upcoming Features
 - Easier model definition using code DSL
 - Better documentation - Please report areas that need more/better documentation!
 
-Local Development Tips
-----------------------
-- Comment out `include 'integration-tests'` in the `settings.gradle` file in the root of the project
-- Execute `./gradlew install` from the command line
-- Uncomment `//include 'integration-tests'` in the `settings.gradle` file in the root of the project
+Local Development
+-----------------
+This project uses gradle as a build system, and uses the new composite builds. See [LOCAL_DEVELOPMENT.md](LOCAL_DEVELOPMENT.md) for working on this project.
 
 Thanks!
 -------
