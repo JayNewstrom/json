@@ -1,13 +1,5 @@
 package com.jaynewstrom.json.compiler
 
-import com.jaynewstrom.json.runtime.internal.BooleanJsonAdapter
-import com.jaynewstrom.json.runtime.internal.ByteJsonAdapter
-import com.jaynewstrom.json.runtime.internal.DoubleJsonAdapter
-import com.jaynewstrom.json.runtime.internal.FloatJsonAdapter
-import com.jaynewstrom.json.runtime.internal.IntegerJsonAdapter
-import com.jaynewstrom.json.runtime.internal.LongJsonAdapter
-import com.jaynewstrom.json.runtime.internal.ShortJsonAdapter
-import com.jaynewstrom.json.runtime.internal.StringJsonAdapter
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterizedTypeName
@@ -45,23 +37,6 @@ class JsonCompiler {
                     .returns(ParameterizedTypeName.get(ClassName.get(Class::class.java), WildcardTypeName.subtypeOf(Any::class.java)))
                     .addStatement("return \$T.class", JsonCompiler.jsonModelType(modelName))
                     .build()
-        }
-
-        fun registerDefaultJsonAdapters(methodBuilder: MethodSpec.Builder) {
-            val codeFormat = "register(\$T.INSTANCE)"
-            methodBuilder.addStatement(codeFormat, ClassName.get(BooleanJsonAdapter::class.java))
-            methodBuilder.addStatement(codeFormat, ClassName.get(ByteJsonAdapter::class.java))
-            methodBuilder.addStatement(codeFormat, ClassName.get(DoubleJsonAdapter::class.java))
-            methodBuilder.addStatement(codeFormat, ClassName.get(FloatJsonAdapter::class.java))
-            methodBuilder.addStatement(codeFormat, ClassName.get(IntegerJsonAdapter::class.java))
-            methodBuilder.addStatement(codeFormat, ClassName.get(LongJsonAdapter::class.java))
-            methodBuilder.addStatement(codeFormat, ClassName.get(ShortJsonAdapter::class.java))
-            methodBuilder.addStatement(codeFormat, ClassName.get(StringJsonAdapter::class.java))
-        }
-
-        fun mapSize(list: Collection<Any>): Int {
-            // Try and initialize the map to a size where it won't need to be expanded.
-            return (Math.round((list.size + 10) * 1.4)).toInt()
         }
     }
 }
