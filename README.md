@@ -16,7 +16,7 @@ How is it different from other json libraries?
 
 How does it work?
 -----------------
-The library uses a custom gradle task to generate models based on the definitions you provide. 
+The library uses a custom gradle task to generate models based on the definitions you provide.
 It can also generate and automatically register serializers and deserializers.  
 
 Setup
@@ -27,7 +27,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.jaynewstrom.json:json-gradle-plugin:0.8.0'
+        classpath 'com.jaynewstrom.json:gradle-plugin:0.8.0'
     }
 }
 
@@ -66,7 +66,7 @@ An example json file is below.
 
 Custom Serializers/Deserializers
 --------------------------------
-Have a type that you can't generate? Platform types such as java.Util.Date can still be (de)serialized! 
+Have a type that you can't generate? Platform types such as java.Util.Date can still be (de)serialized!
 Just call `realJsonDeserializerFactory.register(...)` or `realJsonSerializerFactory.register(...)` to register your custom (de)serializers.
 
 Field Specific Serializers/Deserializers
@@ -79,7 +79,7 @@ Working with other json parsers
 -------------------------------
 Want to work with data that is a little more dynamic? Want to use jackson-databind? Have models that aren't performance critical?
 You can use a custom `JsonSerializer` or `JsonDeserializer` to bridge the gap between the libraries!
-Just call `realJsonDeserializerFactory.register(...)` or `realJsonSerializerFactory.register(...)` to register your custom (de)serializers. 
+Just call `realJsonDeserializerFactory.register(...)` or `realJsonSerializerFactory.register(...)` to register your custom (de)serializers.
 
 Use with AutoValue
 ------------------
@@ -92,7 +92,7 @@ dependencies {
 ```
 
 Specify the "useAutoValue" property on your model definition.
-This will generate an interface with the suffix of `Interface`. 
+This will generate an interface with the suffix of `Interface`.
 A model defined as `SkiResort.json` will generate an interface of `SkiResortInterface.java`.
 It's expected that you will extend this interface and add anything extra here (no extra properties!).
 The generated (de)serializers expect your class that extends `SkiResortInterface` to be name `SkiResort`.
