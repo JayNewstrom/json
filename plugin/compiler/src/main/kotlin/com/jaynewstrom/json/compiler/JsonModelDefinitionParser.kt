@@ -2,6 +2,7 @@ package com.jaynewstrom.json.compiler
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
@@ -22,6 +23,7 @@ data class JsonModelDefinitionParser(val file: File, val createSerializerByDefau
         val createSerializer = modelJson.getBooleanOrDefault("createSerializer", createSerializerByDefault)
         val createDeserializer = modelJson.getBooleanOrDefault("createDeserializer", createDeserializerByDefault)
         val useAutoValue = modelJson.getBooleanOrDefault("useAutoValue", useAutoValueByDefault)
+        onlyContains(modelJson, supportedTypeNames(), "type")
         return ModelDefinition(isPublic, modelName, fieldDefinitions, createSerializer, createDeserializer, useAutoValue)
     }
 
@@ -34,7 +36,7 @@ data class JsonModelDefinitionParser(val file: File, val createSerializerByDefau
         if (optionalType == null) {
             optionalType = ClassName.bestGuess(typeName)
         }
-        val isList = fieldJson.getBooleanOrDefault("isList", false)
+        val isList = fieldJson.getBooleanOrDefault("list", false)
         if (isList) {
             optionalType = ParameterizedTypeName.get(ClassName.get("java.util", "List"), optionalType!!)
         }
@@ -51,10 +53,27 @@ data class JsonModelDefinitionParser(val file: File, val createSerializerByDefau
         if (fieldJson.hasNonNull("customDeserializer")) {
             customDeserializer = ClassName.bestGuess(fieldJson.get("customDeserializer").asText())
         }
+        onlyContains(fieldJson, supportedFieldNames(), "field")
         return FieldDefinition(isPublic, isRequired, type, fieldName, jsonName, customSerializer, customDeserializer)
     }
 
     private fun JsonNode.getBooleanOrDefault(key: String, defaultValue: Boolean): Boolean {
         return if (has(key)) get(key).asBoolean() else defaultValue
+    }
+
+    private fun onlyContains(json: JsonNode, keys: Set<String>, type: String) {
+        (json as ObjectNode).fieldNames().forEach { fieldName ->
+            if (!keys.contains(fieldName)) {
+                throw IllegalArgumentException("$fieldName is not a supported $type property in ${file.path}.")
+            }
+        }
+    }
+
+    private fun supportedTypeNames(): Set<String> {
+        return setOf("public", "fields", "createSerializer", "createDeserializer", "useAutoValue")
+    }
+
+    private fun supportedFieldNames(): Set<String> {
+        return setOf("public", "name", "jsonName", "type", "list", "required", "customSerializer", "customDeserializer")
     }
 }

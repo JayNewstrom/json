@@ -1,5 +1,5 @@
 {
   "fields": [
-    {"name": "basic", "type": "String", "isList": true}
+    {"name": "basic", "type": "String", "list": true}
   ]
 }
