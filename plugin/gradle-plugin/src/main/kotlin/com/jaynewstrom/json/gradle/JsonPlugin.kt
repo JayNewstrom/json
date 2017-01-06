@@ -46,17 +46,10 @@ class JsonPlugin : Plugin<Project> {
             val taskName = "generate${it.name.capitalize()}JsonModel"
             val task = project.tasks.create(taskName, JsonTask::class.java) { jsonTask ->
                 val extension = project.extensions.getByType(JsonExtension::class.java)
-                val defaultPackage = extension.defaultPackage
-                if (defaultPackage.isEmpty()) {
-                    throw IllegalStateException("No default package. Please add the json block to your build.gradle\n" +
-                            "json {\n" +
-                            "\tdefaultPackage \"your.package.here\"\n" +
-                            "}\n")
-                }
-                jsonTask.defaultPackage = defaultPackage
                 jsonTask.createSerializerByDefault = extension.createSerializerByDefault
                 jsonTask.createDeserializerByDefault = extension.createDeserializerByDefault
                 jsonTask.useAutoValueByDefault = extension.useAutoValueByDefault
+                jsonTask.addToCompositeFactory = extension.addToCompositeFactory
             }
             task.group = "jsonmodel"
             task.buildDirectory = project.buildDir

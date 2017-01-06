@@ -1,3 +1,4 @@
+include 'composite'
 include 'gradle-plugin'
 include 'compiler'
 include 'runtime'

@@ -1,0 +1,17 @@
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+
+dependencies {
+    compile 'com.google.auto.service:auto-service:1.0-rc2'
+    compile 'com.squareup:javapoet:1.6.1'
+    compile 'com.squareup.dagger:dagger:1.2.2'
+    compile project(':runtime')
+
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.assertj:assertj-core:1.7.1'
+    testCompile 'com.google.testing.compile:compile-testing:0.8'
+    testCompile files(org.gradle.internal.jvm.Jvm.current().getToolsJar())
+}
+
+apply from: rootProject.file('publish.gradle')

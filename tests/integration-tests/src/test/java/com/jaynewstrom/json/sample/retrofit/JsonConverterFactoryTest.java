@@ -2,8 +2,8 @@ package com.jaynewstrom.json.sample.retrofit;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.jaynewstrom.json.retrofit.JsonConverterFactory;
-import com.jaynewstrom.json.sample.RealJsonDeserializerFactory;
-import com.jaynewstrom.json.sample.RealJsonSerializerFactory;
+import com.jaynewstrom.json.runtime.CompositeJsonDeserializerFactory;
+import com.jaynewstrom.json.runtime.CompositeJsonSerializerFactory;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -67,7 +67,8 @@ public final class JsonConverterFactoryTest {
     }
 
     private Converter.Factory converterFactory() {
-        return JsonConverterFactory.create(new JsonFactory(), new RealJsonSerializerFactory(), new RealJsonDeserializerFactory());
+        return JsonConverterFactory.create(new JsonFactory(), new CompositeJsonSerializerFactory(),
+                new CompositeJsonDeserializerFactory());
     }
 
     @Test public void testResponseModelNotSupported() throws InterruptedException, IOException {

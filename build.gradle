@@ -1,3 +1,4 @@
 task test {
     dependsOn gradle.includedBuild('tests').task(':integration-tests:testDebugUnitTest')
+    dependsOn gradle.includedBuild('plugin').task(':composite:test')
 }

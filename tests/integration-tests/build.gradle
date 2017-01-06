@@ -28,6 +28,7 @@ android {
 
 dependencies {
     annotationProcessor 'com.google.auto.value:auto-value:1.3'
+    annotationProcessor dep.jsonCompositeFactory
     provided 'com.jakewharton.auto.value:auto-value-annotations:1.3'
     compile "com.jaynewstrom.json:retrofit-converter:$ARTIFACT_VERSION"
 
@@ -37,7 +38,6 @@ dependencies {
 }
 
 json {
-    defaultPackage 'com.jaynewstrom.json.sample'
     createSerializerByDefault true
     createDeserializerByDefault true
 }

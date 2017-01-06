@@ -1,6 +1,7 @@
 package com.jaynewstrom.json.compiler
 
 import com.fasterxml.jackson.core.JsonGenerator
+import com.jaynewstrom.json.runtime.AddToCompositeFactory
 import com.jaynewstrom.json.runtime.JsonSerializer
 import com.jaynewstrom.json.runtime.JsonSerializerFactory
 import com.jaynewstrom.json.runtime.internal.ListSerializer
@@ -12,15 +13,19 @@ import com.squareup.javapoet.TypeSpec
 import java.io.IOException
 import javax.lang.model.element.Modifier
 
-internal data class ModelSerializerBuilder(val name: String, val fields: List<FieldDefinition>, val useAutoValue: Boolean) {
+internal data class ModelSerializerBuilder(val name: String, val fields: List<FieldDefinition>, val useAutoValue: Boolean,
+        val addToCompositeFactory: Boolean) {
     fun build(): TypeSpec {
         val jsonFactoryType = ClassName.get(JsonSerializer::class.java)
-        return TypeSpec.classBuilder(JsonCompiler.serializerName(name))
+        val typeSpec = TypeSpec.classBuilder(JsonCompiler.serializerName(name))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addSuperinterface(ParameterizedTypeName.get(jsonFactoryType, JsonCompiler.jsonModelType(name)))
                 .addMethod(JsonCompiler.modelClassMethodSpec(name))
                 .addMethod(serializeMethodSpec())
-                .build()
+        if (addToCompositeFactory) {
+            typeSpec.addAnnotation(AddToCompositeFactory::class.java)
+        }
+        return typeSpec.build()
     }
 
     private fun serializeMethodSpec(): MethodSpec {
