@@ -32,6 +32,15 @@ public final class JsonConverterFactory extends Converter.Factory {
 
     public static Converter.Factory create(JsonFactory jsonFactory, JsonSerializerFactory serializerFactory, JsonDeserializerFactory
             deserializerFactory) {
+        if (jsonFactory == null) {
+            throw new NullPointerException("jsonFactory == null");
+        }
+        if (serializerFactory == null) {
+            throw new NullPointerException("serializerFactory == null");
+        }
+        if (deserializerFactory == null) {
+            throw new NullPointerException("deserializerFactory == null");
+        }
         return new JsonConverterFactory(jsonFactory, serializerFactory, deserializerFactory);
     }
 
