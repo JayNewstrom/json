@@ -62,7 +62,7 @@ class JsonPlugin : Plugin<Project> {
             task.buildDirectory = project.buildDir
             task.description = "Generate Json Models and Factories for ${it.name}"
             task.source("src")
-            task.include("**${File.separatorChar}*.$FILE_EXTENSION")
+            task.include("**/json/**/*.$FILE_EXTENSION".replace('/', File.separatorChar))
             task.exclude("**${File.separatorChar}resources${File.separatorChar}**")
             task.exclude("**${File.separatorChar}assets${File.separatorChar}**")
 
