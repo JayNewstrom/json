@@ -37,7 +37,6 @@ dependencies {
 }
 
 json {
-    defaultPackage 'com.jaynewstrom.json.sample'
     createSerializerByDefault true
     createDeserializerByDefault true
 }

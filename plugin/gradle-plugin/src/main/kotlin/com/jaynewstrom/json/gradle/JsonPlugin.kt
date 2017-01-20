@@ -42,25 +42,18 @@ class JsonPlugin : Plugin<Project> {
             }
         })
 
-        variants.all {
-            val taskName = "generate${it.name.capitalize()}JsonModel"
+        variants.all { variant ->
+            val taskName = "generate${variant.name.capitalize()}JsonModel"
             val task = project.tasks.create(taskName, JsonTask::class.java) { jsonTask ->
                 val extension = project.extensions.getByType(JsonExtension::class.java)
-                val defaultPackage = extension.defaultPackage
-                if (defaultPackage.isEmpty()) {
-                    throw IllegalStateException("No default package. Please add the json block to your build.gradle\n" +
-                            "json {\n" +
-                            "\tdefaultPackage \"your.package.here\"\n" +
-                            "}\n")
-                }
-                jsonTask.defaultPackage = defaultPackage
+                jsonTask.defaultPackage = variant.generateBuildConfig.buildConfigPackageName
                 jsonTask.createSerializerByDefault = extension.createSerializerByDefault
                 jsonTask.createDeserializerByDefault = extension.createDeserializerByDefault
                 jsonTask.useAutoValueByDefault = extension.useAutoValueByDefault
             }
             task.group = "jsonmodel"
             task.buildDirectory = project.buildDir
-            task.description = "Generate Json Models and Factories for ${it.name}"
+            task.description = "Generate Json Models and Factories for ${variant.name}"
             task.source("src")
             task.include("**${File.separatorChar}*.$FILE_EXTENSION")
             task.exclude("**${File.separatorChar}resources${File.separatorChar}**")
@@ -68,7 +61,7 @@ class JsonPlugin : Plugin<Project> {
 
             generateJsonModel.dependsOn(task)
 
-            it.registerJavaGeneratingTask(task, task.outputDirectory)
+            variant.registerJavaGeneratingTask(task, task.outputDirectory)
         }
     }
 }
