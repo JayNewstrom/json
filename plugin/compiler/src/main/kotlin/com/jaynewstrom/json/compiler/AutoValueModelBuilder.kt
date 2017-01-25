@@ -21,7 +21,7 @@ internal data class AutoValueModelBuilder(val isPublic: Boolean, val name: Strin
         val methodBuilder = MethodSpec.methodBuilder("get${fieldName.capitalize()}")
         methodBuilder.addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
         methodBuilder.returns(type)
-        if (!isRequired) {
+        if (addNullableAnnotation()) {
             methodBuilder.addAnnotation(Nullable::class.java)
         }
         return methodBuilder.build()

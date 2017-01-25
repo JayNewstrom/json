@@ -27,4 +27,11 @@ public final class AutoValueTest {
         String json = new JsonTestHelper().serialize(value, NullValue.class);
         assertThat(json).isEqualTo("{\"name\":\"foo\"}");
     }
+
+    @Test public void testAutoValueBuilder() {
+        Person person = Person.builder().setFirstName("Jay").setLastName("Newstrom").setAge(1).build();
+        String json = new JsonTestHelper().serialize(person, Person.class);
+        assertThat(json).isEqualTo("{\"firstName\":\"Jay\",\"lastName\":\"Newstrom\",\"age\":1}");
+        assertThat(person).isEqualTo(new JsonTestHelper().deserializeString(Person.class, json));
+    }
 }

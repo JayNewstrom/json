@@ -61,12 +61,15 @@ open class JsonTask : SourceTask() {
     private fun File.relativePackage() = absolutePath.relativePath(File.separatorChar).dropLast(1).joinToString(".")
 
     private fun modelDefinition(file: File): ModelDefinition {
-        return JsonModelDefinitionParser(file, createSerializerByDefault, createDeserializerByDefault, useAutoValueByDefault).parse()
+        return JsonModelDefinitionParser(file, createSerializerByDefault, createDeserializerByDefault, useAutoValueByDefault,
+                file.relativePackage()).parse()
     }
 
     private fun createModelSpecificClasses(file: File, modelDefinition: ModelDefinition) {
         val packageName = file.relativePackage()
-        JavaFile.builder(packageName, modelDefinition.modelTypeSpec()).build().writeTo(outputDirectory)
+        modelDefinition.modelTypeSpecs().forEach { typeSpec ->
+            JavaFile.builder(packageName, typeSpec).build().writeTo(outputDirectory)
+        }
         if (modelDefinition.createSerializer) {
             JavaFile.builder(packageName, modelDefinition.serializerTypeSpec()).build().writeTo(outputDirectory)
         }

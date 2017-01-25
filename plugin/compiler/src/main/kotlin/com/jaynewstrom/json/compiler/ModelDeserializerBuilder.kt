@@ -15,7 +15,8 @@ import com.squareup.javapoet.TypeSpec
 import java.io.IOException
 import javax.lang.model.element.Modifier
 
-internal data class ModelDeserializerBuilder(val name: String, val fields: List<FieldDefinition>, val useAutoValue: Boolean) {
+internal data class ModelDeserializerBuilder(val name: String, val fields: List<FieldDefinition>, val useAutoValue: Boolean,
+        val generateAutoValueBuilder: Boolean) {
     fun build(): TypeSpec {
         val jsonDeserializerType = ClassName.get(JsonDeserializer::class.java)
         return TypeSpec.classBuilder(JsonCompiler.deserializerName(name))
@@ -79,30 +80,43 @@ internal data class ModelDeserializerBuilder(val name: String, val fields: List<
         }
         methodBuilder.endControlFlow() // End while loop.
 
-        methodBuilder.addComment("Ensure required fields were parsed from json.")
-        fields.forEach { field ->
-            if (field.isRequired) {
-                methodBuilder.beginControlFlow("if (${field.fieldName} == null)")
-                methodBuilder.addStatement("throw new \$T(\$S)", NullPointerException::class.java, "${field.fieldName} == null")
-                methodBuilder.endControlFlow()
+        if (!useAutoValue) {
+            methodBuilder.addComment("Ensure required fields were parsed from json.")
+            fields.forEach { field ->
+                if (field.isRequired) {
+                    methodBuilder.beginControlFlow("if (${field.fieldName} == null)")
+                    methodBuilder.addStatement("throw new \$T(\$S)", NullPointerException::class.java, "${field.fieldName} == null")
+                    methodBuilder.endControlFlow()
+                }
             }
         }
 
         methodBuilder.addComment("Create the model given the parsed fields.")
-        val constructorCallArguments = StringBuilder()
-        fields.forEach { field ->
-            if (!constructorCallArguments.isEmpty()) {
-                constructorCallArguments.append(", ")
+        if (generateAutoValueBuilder) {
+            val builderMethodChain = StringBuilder()
+            val callArguments = mutableListOf<String>()
+            fields.forEach { field ->
+                builderMethodChain.append("\n.set${field.fieldName.capitalize()}(\$L)")
+                callArguments.add(field.fieldName)
             }
-            constructorCallArguments.append(field.fieldName)
-        }
-        val type: String
-        if (useAutoValue) {
-            type = "AutoValue_$name"
+            methodBuilder.addStatement("return new AutoValue_$name.Builder()$builderMethodChain\n.build()",
+                    *callArguments.toTypedArray())
         } else {
-            type = name
+            val constructorCallArguments = StringBuilder()
+            fields.forEach { field ->
+                if (!constructorCallArguments.isEmpty()) {
+                    constructorCallArguments.append(", ")
+                }
+                constructorCallArguments.append(field.fieldName)
+            }
+            val type: String
+            if (useAutoValue) {
+                type = "AutoValue_$name"
+            } else {
+                type = name
+            }
+            methodBuilder.addStatement("return new \$N(\$L)", type, constructorCallArguments.toString())
         }
-        methodBuilder.addStatement("return new \$N(\$L)", type, constructorCallArguments.toString())
     }
 
     private fun FieldDefinition.defaultValue(): String {

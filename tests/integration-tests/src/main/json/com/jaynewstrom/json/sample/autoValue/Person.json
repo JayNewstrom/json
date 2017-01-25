@@ -1,0 +1,8 @@
+{
+  "useAutoValue": true, "generateAutoValueBuilder": true,
+  "fields": [
+    {"name": "firstName", "type": "String"},
+    {"name": "lastName", "type": "String"},
+    {"name": "age", "type": "int"}
+  ]
+}

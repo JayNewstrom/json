@@ -45,6 +45,7 @@ An example json file is below.
   "createSerializer": true, // Not required, defaults to false.
   "createDeserializer": false, // Not required, defaults to false.
   "useAutoValue": true, // Not required, defaults to false.
+  "generateAutoValueBuilder": true, // Not required, defaults to false.
   "fields": [
     {
       "name": "foo", // Required!

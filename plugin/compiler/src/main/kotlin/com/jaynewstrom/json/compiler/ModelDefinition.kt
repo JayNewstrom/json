@@ -2,18 +2,22 @@ package com.jaynewstrom.json.compiler
 
 import com.squareup.javapoet.TypeSpec
 
-data class ModelDefinition(val isPublic: Boolean, val name: String, val fields: List<FieldDefinition>, val createSerializer: Boolean,
-        val createDeserializer: Boolean, val useAutoValue: Boolean) {
-    fun modelTypeSpec(): TypeSpec {
+data class ModelDefinition(val packageName: String, val isPublic: Boolean, val name: String, val fields: List<FieldDefinition>, val createSerializer: Boolean,
+        val createDeserializer: Boolean, val useAutoValue: Boolean, val generateAutoValueBuilder: Boolean) {
+    fun modelTypeSpecs(): Collection<TypeSpec> {
         if (useAutoValue) {
-            return AutoValueModelBuilder(isPublic, name, fields).build()
+            val types = mutableListOf(AutoValueModelBuilder(isPublic, name, fields).build())
+            if (generateAutoValueBuilder) {
+                types.add(AutoValueBuilderBuilder(packageName, isPublic, name, fields).build())
+            }
+            return types
         } else {
-            return ImmutableModelBuilder(isPublic, name, fields).build()
+            return listOf(ImmutableModelBuilder(isPublic, name, fields).build())
         }
     }
 
     fun deserializerTypeSpec(): TypeSpec {
-        return ModelDeserializerBuilder(name, fields, useAutoValue).build()
+        return ModelDeserializerBuilder(name, fields, useAutoValue, generateAutoValueBuilder).build()
     }
 
     fun serializerTypeSpec(): TypeSpec {

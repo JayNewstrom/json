@@ -10,7 +10,7 @@ import java.io.File
 import java.util.ArrayList
 
 data class JsonModelDefinitionParser(val file: File, val createSerializerByDefault: Boolean,
-        val createDeserializerByDefault: Boolean, val useAutoValueByDefault: Boolean) {
+        val createDeserializerByDefault: Boolean, val useAutoValueByDefault: Boolean, val packageName: String) {
     fun parse(): ModelDefinition {
         val objectMapper = ObjectMapper()
         val modelJson = objectMapper.readTree(file)
@@ -23,8 +23,13 @@ data class JsonModelDefinitionParser(val file: File, val createSerializerByDefau
         val createSerializer = modelJson.getBooleanOrDefault("createSerializer", createSerializerByDefault)
         val createDeserializer = modelJson.getBooleanOrDefault("createDeserializer", createDeserializerByDefault)
         val useAutoValue = modelJson.getBooleanOrDefault("useAutoValue", useAutoValueByDefault)
+        val generateAutoValueBuilder = modelJson.getBooleanOrDefault("generateAutoValueBuilder", false)
+        if (!useAutoValue && generateAutoValueBuilder) {
+            throw IllegalStateException("Can't generate auto value builder interface without using auto value in ${file.path}.")
+        }
         onlyContains(modelJson, supportedTypeNames(), "type")
-        return ModelDefinition(isPublic, modelName, fieldDefinitions, createSerializer, createDeserializer, useAutoValue)
+        return ModelDefinition(packageName, isPublic, modelName, fieldDefinitions, createSerializer, createDeserializer, useAutoValue,
+                generateAutoValueBuilder)
     }
 
     private fun parseField(fieldJson: JsonNode, modelIsPublic: Boolean): FieldDefinition {
@@ -70,7 +75,7 @@ data class JsonModelDefinitionParser(val file: File, val createSerializerByDefau
     }
 
     private fun supportedTypeNames(): Set<String> {
-        return setOf("public", "fields", "createSerializer", "createDeserializer", "useAutoValue")
+        return setOf("public", "fields", "createSerializer", "createDeserializer", "useAutoValue", "generateAutoValueBuilder")
     }
 
     private fun supportedFieldNames(): Set<String> {
