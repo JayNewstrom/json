@@ -1,5 +1,6 @@
 package com.jaynewstrom.json.compiler
 
+import com.jaynewstrom.json.runtime.internal.Nullable
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeSpec
 import javax.lang.model.element.Modifier
@@ -20,6 +21,9 @@ internal data class AutoValueModelBuilder(val isPublic: Boolean, val name: Strin
         val methodBuilder = MethodSpec.methodBuilder("get${fieldName.capitalize()}")
         methodBuilder.addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
         methodBuilder.returns(type)
+        if (!isRequired) {
+            methodBuilder.addAnnotation(Nullable::class.java)
+        }
         return methodBuilder.build()
     }
 }

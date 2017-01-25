@@ -1,0 +1,6 @@
+{
+  "useAutoValue": true,
+  "fields": [
+    {"name": "name", "type": "String", "required": false}
+  ]
+}
