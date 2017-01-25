@@ -5,6 +5,7 @@ import com.jaynewstrom.json.sample.JsonTestHelper;
 import org.junit.Test;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 public final class ListTest {
     @Test public void testAllTheThings() {
@@ -24,5 +25,15 @@ public final class ListTest {
         assertThat(basic.basic.get(2)).isEqualTo("c");
         String json = new JsonTestHelper().serialize(basic);
         assertThat(json).isEqualTo("{\"basic\":[\"a\",\"b\",\"c\"]}");
+    }
+
+    @Test public void testListIsImmutable() {
+        Basic basic = new JsonTestHelper().deserializeFile(Basic.class, "BasicTest.json", this);
+        try {
+            basic.basic.add("This should fail.");
+            fail();
+        } catch (UnsupportedOperationException expected) {
+            assertThat(expected).isNotNull();
+        }
     }
 }

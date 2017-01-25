@@ -7,6 +7,7 @@ import com.jaynewstrom.json.runtime.JsonDeserializerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public final class ListDeserializer<T> implements JsonDeserializer<List<T>> {
@@ -27,7 +28,7 @@ public final class ListDeserializer<T> implements JsonDeserializer<List<T>> {
             list.add(elementFactory.deserialize(jp, deserializerFactory));
         }
 
-        return list;
+        return Collections.unmodifiableList(list);
     }
 
     @Override public Class<?> modelClass() {
