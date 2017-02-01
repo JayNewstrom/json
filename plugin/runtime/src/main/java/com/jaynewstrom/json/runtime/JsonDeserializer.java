@@ -6,6 +6,4 @@ import java.io.IOException;
 
 public interface JsonDeserializer<T> {
     T deserialize(JsonParser jp, JsonDeserializerFactory deserializerFactory) throws IOException;
-
-    Class<?> modelClass();
 }

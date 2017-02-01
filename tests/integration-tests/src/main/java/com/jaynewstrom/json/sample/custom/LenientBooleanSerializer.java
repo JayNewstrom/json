@@ -10,8 +10,4 @@ final class LenientBooleanSerializer implements JsonSerializer<Boolean> {
     @Override public void serialize(Boolean aBoolean, JsonGenerator jg, JsonSerializerFactory serializerFactory) throws IOException {
         jg.writeString(aBoolean.toString());
     }
-
-    @Override public Class<?> modelClass() {
-        return Boolean.class;
-    }
 }

@@ -21,8 +21,4 @@ public final class ListSerializer<T> implements JsonSerializer<List<T>> {
         }
         jg.writeEndArray();
     }
-
-    @Override public Class<?> modelClass() {
-        throw new UnsupportedOperationException("The modelClass method shouldn't be used on ListSerializer.");
-    }
 }

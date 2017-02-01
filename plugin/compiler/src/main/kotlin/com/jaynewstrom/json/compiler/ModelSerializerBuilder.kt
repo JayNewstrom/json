@@ -1,6 +1,7 @@
 package com.jaynewstrom.json.compiler
 
 import com.fasterxml.jackson.core.JsonGenerator
+import com.jaynewstrom.json.runtime.JsonRegistrable
 import com.jaynewstrom.json.runtime.JsonSerializer
 import com.jaynewstrom.json.runtime.JsonSerializerFactory
 import com.jaynewstrom.json.runtime.internal.ListSerializer
@@ -18,6 +19,7 @@ internal data class ModelSerializerBuilder(val name: String, val fields: List<Fi
         return TypeSpec.classBuilder(JsonCompiler.serializerName(name))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addSuperinterface(ParameterizedTypeName.get(jsonFactoryType, JsonCompiler.jsonModelType(name)))
+                .addSuperinterface(ClassName.get(JsonRegistrable::class.java))
                 .addMethod(JsonCompiler.modelClassMethodSpec(name))
                 .addMethod(serializeMethodSpec())
                 .build()

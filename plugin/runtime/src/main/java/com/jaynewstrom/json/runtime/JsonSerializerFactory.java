@@ -27,12 +27,12 @@ public abstract class JsonSerializerFactory {
         register(StringJsonAdapter.INSTANCE);
     }
 
-    public final void register(JsonSerializer<?> jsonSerializer) {
-        serializerMap.put(jsonSerializer.modelClass(), jsonSerializer);
-    }
-
     public final <T> JsonSerializer<T> get(Class<T> modelClass) {
         // noinspection unchecked
         return (JsonSerializer<T>) serializerMap.get(modelClass);
+    }
+
+    public final <T extends JsonSerializer<?> & JsonRegistrable> void register(T jsonSerializer) {
+        serializerMap.put(jsonSerializer.modelClass(), jsonSerializer);
     }
 }

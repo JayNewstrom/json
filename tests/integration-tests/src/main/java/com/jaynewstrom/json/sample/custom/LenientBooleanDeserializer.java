@@ -10,8 +10,4 @@ final class LenientBooleanDeserializer implements JsonDeserializer<Boolean> {
     @Override public Boolean deserialize(JsonParser jp, JsonDeserializerFactory deserializerFactory) throws IOException {
         return jp.getValueAsBoolean();
     }
-
-    @Override public Class<?> modelClass() {
-        return Boolean.class;
-    }
 }

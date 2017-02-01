@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonToken
 import com.jaynewstrom.json.runtime.JsonDeserializer
 import com.jaynewstrom.json.runtime.JsonDeserializerFactory
+import com.jaynewstrom.json.runtime.JsonRegistrable
 import com.jaynewstrom.json.runtime.internal.ExtraneousArrayConsumer
 import com.jaynewstrom.json.runtime.internal.ExtraneousObjectConsumer
 import com.jaynewstrom.json.runtime.internal.ListDeserializer
@@ -22,6 +23,7 @@ internal data class ModelDeserializerBuilder(val name: String, val fields: List<
         return TypeSpec.classBuilder(JsonCompiler.deserializerName(name))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addSuperinterface(ParameterizedTypeName.get(jsonDeserializerType, JsonCompiler.jsonModelType(name)))
+                .addSuperinterface(ClassName.get(JsonRegistrable::class.java))
                 .addMethod(JsonCompiler.modelClassMethodSpec(name))
                 .addMethod(createMethodSpec())
                 .build()

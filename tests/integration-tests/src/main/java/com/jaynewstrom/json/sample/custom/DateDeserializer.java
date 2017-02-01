@@ -11,8 +11,4 @@ final class DateDeserializer implements JsonDeserializer<Date> {
     @Override public Date deserialize(JsonParser jp, JsonDeserializerFactory deserializerFactory) throws IOException {
         return new Date(jp.getLongValue());
     }
-
-    @Override public Class<?> modelClass() {
-        return DateDeserializer.class;
-    }
 }

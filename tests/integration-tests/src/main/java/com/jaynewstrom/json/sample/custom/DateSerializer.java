@@ -11,8 +11,4 @@ final class DateSerializer implements JsonSerializer<Date> {
     @Override public void serialize(Date date, JsonGenerator jg, JsonSerializerFactory serializerFactory) throws IOException {
         jg.writeNumber(date.getTime());
     }
-
-    @Override public Class<?> modelClass() {
-        return Date.class;
-    }
 }

@@ -30,8 +30,4 @@ public final class ListDeserializer<T> implements JsonDeserializer<List<T>> {
 
         return Collections.unmodifiableList(list);
     }
-
-    @Override public Class<?> modelClass() {
-        throw new UnsupportedOperationException("The modelClass method shouldn't be used on ListDeserializer.");
-    }
 }

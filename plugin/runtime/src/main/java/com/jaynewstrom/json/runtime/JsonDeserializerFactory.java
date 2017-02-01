@@ -32,7 +32,7 @@ public abstract class JsonDeserializerFactory {
         return (JsonDeserializer<T>) deserializerMap.get(modelClass);
     }
 
-    public final void register(JsonDeserializer<?> jsonDeserializer) {
+    public final <T extends JsonDeserializer<?> & JsonRegistrable> void register(T jsonDeserializer) {
         deserializerMap.put(jsonDeserializer.modelClass(), jsonDeserializer);
     }
 }

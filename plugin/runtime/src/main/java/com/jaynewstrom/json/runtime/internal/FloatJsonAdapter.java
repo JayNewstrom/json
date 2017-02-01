@@ -4,12 +4,13 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.jaynewstrom.json.runtime.JsonDeserializer;
 import com.jaynewstrom.json.runtime.JsonDeserializerFactory;
+import com.jaynewstrom.json.runtime.JsonRegistrable;
 import com.jaynewstrom.json.runtime.JsonSerializer;
 import com.jaynewstrom.json.runtime.JsonSerializerFactory;
 
 import java.io.IOException;
 
-public final class FloatJsonAdapter implements JsonSerializer<Float>, JsonDeserializer<Float> {
+public final class FloatJsonAdapter implements JsonSerializer<Float>, JsonDeserializer<Float>, JsonRegistrable {
     public static final FloatJsonAdapter INSTANCE = new FloatJsonAdapter();
 
     private FloatJsonAdapter() {
