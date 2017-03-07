@@ -1,14 +1,14 @@
 ext {
-    kotlinVersion = '1.0.5'
+    kotlinVersion = '1.1.0'
 
     dep = [
-            androidPlugin: 'com.android.tools.build:gradle:2.2.1',
+            androidPlugin: 'com.android.tools.build:gradle:2.3.0',
             javaPoet: 'com.squareup:javapoet:1.8.0',
             kotlinStdLib: "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
             kotlinReflect: "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
             kotlinGradlePlugin: "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion",
-            jackson: 'com.fasterxml.jackson.core:jackson-core:2.8.5',
-            jacksonDatabind: 'com.fasterxml.jackson.core:jackson-databind:2.8.5',
+            jackson: 'com.fasterxml.jackson.core:jackson-core:2.8.7',
+            jacksonDatabind: 'com.fasterxml.jackson.core:jackson-databind:2.8.7',
     ]
 }
 
