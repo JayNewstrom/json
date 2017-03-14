@@ -45,48 +45,62 @@ public final class JsonConverterFactory extends Converter.Factory {
     }
 
     @Override public Converter<ResponseBody, ?> responseBodyConverter(Type type, Annotation[] annotations, Retrofit retrofit) {
-        if (type instanceof Class) {
-            JsonDeserializer<?> deserializer = deserializerFactory.get((Class<?>) type);
-            if (deserializer != null) {
-                return new ResponseBodyConverter<>(jsonFactory, deserializer, deserializerFactory);
-            }
+        JsonDeserializer<?> deserializer = deserializerForType(type);
+        if (deserializer != null) {
+            return new ResponseBodyConverter<>(jsonFactory, deserializer, deserializerFactory);
         }
+        return super.responseBodyConverter(type, annotations, retrofit);
+    }
+
+    private JsonDeserializer<?> deserializerForType(Type type) {
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
-            Type[] typeArguments = parameterizedType.getActualTypeArguments();
-            Type firstType = typeArguments[0];
-            if (firstType instanceof Class) {
-                JsonDeserializer<?> deserializer = deserializerFactory.get((Class<?>) firstType);
-                Type rawType = parameterizedType.getRawType();
-                if (deserializer != null && rawType == List.class) {
-                    return new ResponseBodyConverter<>(jsonFactory, new ListDeserializer<>(deserializer), deserializerFactory);
+            if (parameterizedType.getRawType() == List.class) {
+                Type[] typeArguments = parameterizedType.getActualTypeArguments();
+                Type firstType = typeArguments[0];
+                JsonDeserializer<?> deserializer = deserializerForType(firstType);
+                if (deserializer != null) {
+                    return new ListDeserializer<>(deserializer);
                 }
             }
         }
-        return super.responseBodyConverter(type, annotations, retrofit);
+        if (type instanceof Class) {
+            JsonDeserializer<?> deserializer = deserializerFactory.get((Class<?>) type);
+            if (deserializer != null) {
+                return deserializer;
+            }
+        }
+        return null;
     }
 
     @Override
     public Converter<?, RequestBody> requestBodyConverter(Type type, Annotation[] parameterAnnotations, Annotation[] methodAnnotations,
             Retrofit retrofit) {
-        if (type instanceof Class) {
-            JsonSerializer<?> serializer = serializerFactory.get((Class<?>) type);
-            if (serializer != null) {
-                return new RequestBodyConverter<>(jsonFactory, serializer, serializerFactory);
-            }
+        JsonSerializer<?> jsonSerializer = serializerForType(type);
+        if (jsonSerializer != null) {
+            return new RequestBodyConverter<>(jsonFactory, jsonSerializer, serializerFactory);
         }
+        return super.requestBodyConverter(type, parameterAnnotations, methodAnnotations, retrofit);
+    }
+
+    private JsonSerializer<?> serializerForType(Type type) {
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
-            Type[] typeArguments = parameterizedType.getActualTypeArguments();
-            Type firstType = typeArguments[0];
-            if (firstType instanceof Class) {
-                JsonSerializer<?> serializer = serializerFactory.get((Class<?>) firstType);
-                Type rawType = parameterizedType.getRawType();
-                if (serializer != null && rawType == List.class) {
-                    return new RequestBodyConverter<>(jsonFactory, new ListSerializer<>(serializer), serializerFactory);
+            if (parameterizedType.getRawType() == List.class) {
+                Type[] typeArguments = parameterizedType.getActualTypeArguments();
+                Type firstType = typeArguments[0];
+                JsonSerializer<?> serializer = serializerForType(firstType);
+                if (serializer != null) {
+                    return new ListSerializer<>(serializer);
                 }
             }
         }
-        return super.requestBodyConverter(type, parameterAnnotations, methodAnnotations, retrofit);
+        if (type instanceof Class) {
+            JsonSerializer<?> serializer = serializerFactory.get((Class<?>) type);
+            if (serializer != null) {
+                return serializer;
+            }
+        }
+        return null;
     }
 }

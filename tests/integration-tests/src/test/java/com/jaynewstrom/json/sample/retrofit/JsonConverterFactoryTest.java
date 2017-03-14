@@ -39,7 +39,11 @@ public final class JsonConverterFactoryTest {
 
         @POST("test") Call<List<Basic>> callBasicResponseWithList();
 
+        @POST("test") Call<List<List<Basic>>> callBasicResponseWithNestedList();
+
         @POST("test") Call<Void> callBasicRequestWithList(@Body List<Basic> list);
+
+        @POST("test") Call<Void> callBasicRequestWithNestedList(@Body List<List<Basic>> list);
 
         @POST("test") Call<AutoBasic> callAutoBasicResponse();
 
@@ -117,6 +121,16 @@ public final class JsonConverterFactoryTest {
         assertThat(responseBody.get(0).foo).isEqualTo("bar");
     }
 
+    @Test public void testResponseConverterWithNestedList() throws InterruptedException, IOException {
+        mockWebServer.enqueue(new MockResponse().setBody("[[{\"foo\":\"bar\"}]]"));
+        Call<List<List<Basic>>> call = service().callBasicResponseWithNestedList();
+        Response<List<List<Basic>>> response = call.execute();
+        List<List<Basic>> responseBody = response.body();
+        assertThat(responseBody).hasSize(1);
+        assertThat(responseBody.get(0)).hasSize(1);
+        assertThat(responseBody.get(0).get(0).foo).isEqualTo("bar");
+    }
+
     @Test public void testRequestConverterWithList() throws InterruptedException, IOException {
         mockWebServer.enqueue(new MockResponse());
         Basic requestBody = new Basic("bar");
@@ -125,6 +139,16 @@ public final class JsonConverterFactoryTest {
         RecordedRequest request = mockWebServer.takeRequest();
         assertThat(request.getHeader("Content-Type")).isEqualTo("application/json; charset=UTF-8");
         assertThat(request.getBody().readUtf8()).isEqualTo("[{\"foo\":\"bar\"}]");
+    }
+
+    @Test public void testRequestConverterWithNestedList() throws InterruptedException, IOException {
+        mockWebServer.enqueue(new MockResponse());
+        Basic requestBody = new Basic("bar");
+        Call<Void> call = service().callBasicRequestWithNestedList(Collections.singletonList(Collections.singletonList(requestBody)));
+        call.execute();
+        RecordedRequest request = mockWebServer.takeRequest();
+        assertThat(request.getHeader("Content-Type")).isEqualTo("application/json; charset=UTF-8");
+        assertThat(request.getBody().readUtf8()).isEqualTo("[[{\"foo\":\"bar\"}]]");
     }
 
     @Test public void testResponseConverterUsingAutoValue() throws InterruptedException, IOException {
