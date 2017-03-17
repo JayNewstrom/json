@@ -12,8 +12,8 @@ import com.jaynewstrom.json.runtime.internal.StringJsonAdapter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public abstract class JsonSerializerFactory {
-    final Map<Class<?>, JsonSerializer<?>> serializerMap;
+public class JsonSerializerFactory {
+    private final Map<Class<?>, JsonSerializer<?>> serializerMap;
 
     public JsonSerializerFactory() {
         serializerMap = new LinkedHashMap<>();
@@ -34,5 +34,9 @@ public abstract class JsonSerializerFactory {
 
     public final <T extends JsonSerializer<?> & JsonRegistrable> void register(T jsonSerializer) {
         serializerMap.put(jsonSerializer.modelClass(), jsonSerializer);
+    }
+
+    public final void registerAll(JsonSerializerFactory serializerFactory) {
+        serializerMap.putAll(serializerFactory.serializerMap);
     }
 }

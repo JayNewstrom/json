@@ -12,8 +12,8 @@ import com.jaynewstrom.json.runtime.internal.StringJsonAdapter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public abstract class JsonDeserializerFactory {
-    final Map<Class<?>, JsonDeserializer<?>> deserializerMap;
+public class JsonDeserializerFactory {
+    private final Map<Class<?>, JsonDeserializer<?>> deserializerMap;
 
     public JsonDeserializerFactory() {
         deserializerMap = new LinkedHashMap<>();
@@ -34,5 +34,9 @@ public abstract class JsonDeserializerFactory {
 
     public final <T extends JsonDeserializer<?> & JsonRegistrable> void register(T jsonDeserializer) {
         deserializerMap.put(jsonDeserializer.modelClass(), jsonDeserializer);
+    }
+
+    public final void registerAll(JsonDeserializerFactory deserializerFactory) {
+        deserializerMap.putAll(deserializerFactory.deserializerMap);
     }
 }

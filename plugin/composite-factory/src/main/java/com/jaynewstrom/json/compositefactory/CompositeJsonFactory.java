@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 
-import com.jaynewstrom.json.runtime.CompositeJsonDeserializerFactory;
-import com.jaynewstrom.json.runtime.CompositeJsonSerializerFactory;
 import com.jaynewstrom.json.runtime.JsonDeserializerFactory;
 import com.jaynewstrom.json.runtime.JsonSerializerFactory;
 
@@ -14,13 +12,13 @@ public final class CompositeJsonFactory {
     private static final String JSON_DESERIALIZER_FACTORY_VALUE = "JsonDeserializerFactory";
 
     private final Context context;
-    private final CompositeJsonSerializerFactory compositeJsonSerializerFactory;
-    private final CompositeJsonDeserializerFactory compositeJsonDeserializerFactory;
+    private final JsonSerializerFactory compositeJsonSerializerFactory;
+    private final JsonDeserializerFactory compositeJsonDeserializerFactory;
 
     public CompositeJsonFactory(Context context) {
         this.context = context;
-        this.compositeJsonSerializerFactory = new CompositeJsonSerializerFactory();
-        this.compositeJsonDeserializerFactory = new CompositeJsonDeserializerFactory();
+        this.compositeJsonSerializerFactory = new JsonSerializerFactory();
+        this.compositeJsonDeserializerFactory = new JsonDeserializerFactory();
         initialize();
     }
 
