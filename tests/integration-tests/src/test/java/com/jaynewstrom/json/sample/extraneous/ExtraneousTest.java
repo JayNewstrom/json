@@ -20,4 +20,11 @@ public final class ExtraneousTest {
         Extraneous extraneous = testHelper.deserializeString(Extraneous.class, json);
         assertThat(extraneous.foo).isEqualTo("bar");
     }
+
+    @Test public void testDeserializer_whenThereIsAnExtraneousField() {
+        JsonTestHelper testHelper = new JsonTestHelper();
+        String json = "{\"extra\":\"blah\",\"foo\":\"bar\",\"extra2\":false}";
+        Extraneous extraneous = testHelper.deserializeString(Extraneous.class, json);
+        assertThat(extraneous.foo).isEqualTo("bar");
+    }
 }

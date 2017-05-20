@@ -5,8 +5,6 @@ import com.fasterxml.jackson.core.JsonToken
 import com.jaynewstrom.json.runtime.JsonDeserializer
 import com.jaynewstrom.json.runtime.JsonDeserializerFactory
 import com.jaynewstrom.json.runtime.JsonRegistrable
-import com.jaynewstrom.json.runtime.internal.ExtraneousArrayConsumer
-import com.jaynewstrom.json.runtime.internal.ExtraneousObjectConsumer
 import com.jaynewstrom.json.runtime.internal.ListDeserializer
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
@@ -74,10 +72,8 @@ internal data class ModelDeserializerBuilder(val name: String, val fields: List<
                 }
                 field.assignVariable(methodBuilder)
             }
-            methodBuilder.nextControlFlow("else if (nextToken == \$T.\$L)", JsonToken::class.java, JsonToken.START_OBJECT)
-            methodBuilder.addStatement("\$T.INSTANCE.consume($JSON_PARSER_VARIABLE_NAME)", ExtraneousObjectConsumer::class.java)
-            methodBuilder.nextControlFlow("else if (nextToken == \$T.\$L)", JsonToken::class.java, JsonToken.START_ARRAY)
-            methodBuilder.addStatement("\$T.INSTANCE.consume($JSON_PARSER_VARIABLE_NAME)", ExtraneousArrayConsumer::class.java)
+            methodBuilder.nextControlFlow("else")
+            methodBuilder.addStatement("$JSON_PARSER_VARIABLE_NAME.skipChildren()")
             methodBuilder.endControlFlow() // End if / else if.
         }
         methodBuilder.endControlFlow() // End while loop.
