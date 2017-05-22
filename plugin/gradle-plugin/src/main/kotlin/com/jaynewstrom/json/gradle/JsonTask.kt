@@ -10,6 +10,7 @@ import com.jaynewstrom.json.compiler.relativePath
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.TypeName
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.SourceTask
@@ -17,6 +18,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
 
+@CacheableTask
 open class JsonTask : SourceTask() {
     @Suppress("unused") // Required to invalidate the task on version updates.
     @Input fun pluginVersion() = VERSION
