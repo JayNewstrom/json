@@ -10,7 +10,7 @@ import javax.lang.model.element.Modifier
 internal data class AutoValueBuilderBuilder(private val packageName: String, private val isPublic: Boolean, private val name: String,
         private val fields: List<FieldDefinition>) {
     fun build(): TypeSpec {
-        val classBuilder = TypeSpec.interfaceBuilder("${name}BuilderInterface")
+        val classBuilder = TypeSpec.interfaceBuilder("$name${JsonCompiler.INTERFACE_BUILDER_SUFFIX}")
         if (isPublic) {
             classBuilder.addModifiers(Modifier.PUBLIC)
         }
