@@ -9,6 +9,7 @@ ext {
             kotlinGradlePlugin: "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion",
             jackson: 'com.fasterxml.jackson.core:jackson-core:2.8.8',
             jacksonDatabind: 'com.fasterxml.jackson.core:jackson-databind:2.8.8',
+            jsr305: 'com.google.code.findbugs:jsr305:3.0.2',
     ]
 }
 
