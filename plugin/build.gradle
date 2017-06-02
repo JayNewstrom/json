@@ -1,5 +1,6 @@
 ext {
     kotlinVersion = '1.1.0'
+    compositeVersion = '0.3.0'
 
     dep = [
             androidPlugin: 'com.android.tools.build:gradle:2.3.2',
@@ -10,6 +11,7 @@ ext {
             jackson: 'com.fasterxml.jackson.core:jackson-core:2.8.8',
             jacksonDatabind: 'com.fasterxml.jackson.core:jackson-databind:2.8.8',
             jsr305: 'com.google.code.findbugs:jsr305:3.0.2',
+            compositeRuntime: "com.jaynewstrom.composite:runtime:$compositeVersion",
     ]
 }
 

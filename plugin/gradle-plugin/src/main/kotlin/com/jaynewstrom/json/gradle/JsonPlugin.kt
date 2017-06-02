@@ -5,6 +5,7 @@ import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.api.BaseVariant
+import com.jaynewstrom.json.compiler.COMPOSITE_VERSION
 import com.jaynewstrom.json.compiler.JsonCompiler.Companion.FILE_EXTENSION
 import com.jaynewstrom.json.compiler.VERSION
 import org.gradle.api.DomainObjectSet
@@ -32,9 +33,12 @@ class JsonPlugin : Plugin<Project> {
         val generateJsonModel = project.task("generateJsonModel")
 
         val compileDeps = project.configurations.getByName("compile").dependencies
+        val annotationProcessorDeps = project.configurations.getByName("annotationProcessor").dependencies
         project.gradle.addListener(object : DependencyResolutionListener {
             override fun beforeResolve(dependencies: ResolvableDependencies?) {
                 compileDeps.add(project.dependencies.create("com.jaynewstrom.json:runtime:$VERSION"))
+                compileDeps.add(project.dependencies.create("com.jaynewstrom.composite:runtime:$COMPOSITE_VERSION"))
+                annotationProcessorDeps.add(project.dependencies.create("com.jaynewstrom.composite:compiler:$COMPOSITE_VERSION"))
                 project.gradle.removeListener(this)
             }
 

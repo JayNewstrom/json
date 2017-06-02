@@ -1,6 +1,8 @@
 package com.jaynewstrom.json.compiler
 
+import com.jaynewstrom.composite.runtime.LibraryModule
 import com.jaynewstrom.json.runtime.JsonSerializerFactory
+import com.squareup.javapoet.AnnotationSpec
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeName
@@ -10,9 +12,16 @@ import javax.lang.model.element.Modifier
 data class SerializerFactoryBuilder(val serializers: Collection<TypeName>) {
     fun build(): TypeSpec {
         return TypeSpec.classBuilder("RealJsonSerializerFactory")
+                .addAnnotation(libraryModuleAnnotation())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .superclass(ClassName.get(JsonSerializerFactory::class.java))
                 .addMethod(createConstructor())
+                .build()
+    }
+
+    private fun libraryModuleAnnotation(): AnnotationSpec {
+        return AnnotationSpec.builder(LibraryModule::class.java)
+                .addMember("value", "\$S", JsonSerializerFactory::class.java.name)
                 .build()
     }
 
