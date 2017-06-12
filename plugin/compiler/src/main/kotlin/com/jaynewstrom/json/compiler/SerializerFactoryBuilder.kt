@@ -21,7 +21,7 @@ data class SerializerFactoryBuilder(val serializers: Collection<TypeName>) {
 
     private fun libraryModuleAnnotation(): AnnotationSpec {
         return AnnotationSpec.builder(LibraryModule::class.java)
-                .addMember("value", "\$S", JsonSerializerFactory::class.java.name)
+                .addMember("value", "\$T.class", JsonSerializerFactory::class.java)
                 .build()
     }
 

@@ -21,7 +21,7 @@ data class DeserializerFactoryBuilder(val deserializers: Collection<TypeName>) {
 
     private fun libraryModuleAnnotation(): AnnotationSpec {
         return AnnotationSpec.builder(LibraryModule::class.java)
-                .addMember("value", "\$S", JsonDeserializerFactory::class.java.name)
+                .addMember("value", "\$T.class", JsonDeserializerFactory::class.java)
                 .build()
     }
 
