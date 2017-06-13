@@ -13,6 +13,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencyResolutionListener
 import org.gradle.api.artifacts.ResolvableDependencies
+import org.gradle.api.artifacts.UnknownConfigurationException
 import java.io.File
 
 class JsonPlugin : Plugin<Project> {
@@ -34,11 +35,17 @@ class JsonPlugin : Plugin<Project> {
 
         val compileDeps = project.configurations.getByName("compile").dependencies
         val annotationProcessorDeps = project.configurations.getByName("annotationProcessor").dependencies
+        val kaptDeps = try {
+            project.configurations.getByName("kapt").dependencies
+        } catch(e: UnknownConfigurationException) {
+            null
+        }
         project.gradle.addListener(object : DependencyResolutionListener {
             override fun beforeResolve(dependencies: ResolvableDependencies?) {
                 compileDeps.add(project.dependencies.create("com.jaynewstrom.json:runtime:$VERSION"))
                 compileDeps.add(project.dependencies.create("com.jaynewstrom.composite:runtime:$COMPOSITE_VERSION"))
                 annotationProcessorDeps.add(project.dependencies.create("com.jaynewstrom.composite:compiler:$COMPOSITE_VERSION"))
+                kaptDeps?.add(project.dependencies.create("com.jaynewstrom.composite:compiler:$COMPOSITE_VERSION"))
                 project.gradle.removeListener(this)
             }
 
