@@ -12,6 +12,7 @@ import org.gradle.api.DomainObjectSet
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencyResolutionListener
+import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.ResolvableDependencies
 import org.gradle.api.artifacts.UnknownConfigurationException
 import java.io.File
@@ -33,19 +34,13 @@ class JsonPlugin : Plugin<Project> {
 
         val generateJsonModel = project.task("generateJsonModel")
 
-        val compileDeps = project.configurations.getByName("compile").dependencies
-        val annotationProcessorDeps = project.configurations.getByName("annotationProcessor").dependencies
-        val kaptDeps = try {
-            project.configurations.getByName("kapt").dependencies
-        } catch(e: UnknownConfigurationException) {
-            null
-        }
+        val compileDeps = project.dependencySetForName("implementation") ?: project.dependencySetForName("compile")
+        val annotationProcessorDeps = project.dependencySetForName("kapt") ?: project.dependencySetForName("annotationProcessor")
         project.gradle.addListener(object : DependencyResolutionListener {
             override fun beforeResolve(dependencies: ResolvableDependencies?) {
-                compileDeps.add(project.dependencies.create("com.jaynewstrom.json:runtime:$VERSION"))
-                compileDeps.add(project.dependencies.create("com.jaynewstrom.composite:runtime:$COMPOSITE_VERSION"))
-                annotationProcessorDeps.add(project.dependencies.create("com.jaynewstrom.composite:compiler:$COMPOSITE_VERSION"))
-                kaptDeps?.add(project.dependencies.create("com.jaynewstrom.composite:compiler:$COMPOSITE_VERSION"))
+                compileDeps?.add(project.dependencies.create("com.jaynewstrom.json:runtime:$VERSION"))
+                compileDeps?.add(project.dependencies.create("com.jaynewstrom.composite:runtime:$COMPOSITE_VERSION"))
+                annotationProcessorDeps?.add(project.dependencies.create("com.jaynewstrom.composite:compiler:$COMPOSITE_VERSION"))
                 project.gradle.removeListener(this)
             }
 
@@ -73,6 +68,14 @@ class JsonPlugin : Plugin<Project> {
             generateJsonModel.dependsOn(task)
 
             variant.registerJavaGeneratingTask(task, task.outputDirectory)
+        }
+    }
+
+    private fun Project.dependencySetForName(name: String): DependencySet? {
+        try {
+            return configurations.getByName(name).dependencies
+        } catch(e: UnknownConfigurationException) {
+            return null
         }
     }
 }
