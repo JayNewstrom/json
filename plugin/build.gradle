@@ -1,6 +1,6 @@
 ext {
     kotlinVersion = '1.1.2-5'
-    compositeVersion = '0.4.0'
+    compositeVersion = '0.5.0'
 
     dep = [
             androidPlugin: 'com.android.tools.build:gradle:2.3.2',
