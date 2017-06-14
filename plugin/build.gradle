@@ -1,5 +1,5 @@
 ext {
-    kotlinVersion = '1.1.0'
+    kotlinVersion = '1.1.2-5'
     compositeVersion = '0.4.0'
 
     dep = [
@@ -8,8 +8,8 @@ ext {
             kotlinStdLib: "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
             kotlinReflect: "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
             kotlinGradlePlugin: "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion",
-            jackson: 'com.fasterxml.jackson.core:jackson-core:2.8.8',
-            jacksonDatabind: 'com.fasterxml.jackson.core:jackson-databind:2.8.8',
+            jackson: 'com.fasterxml.jackson.core:jackson-core:2.8.9',
+            jacksonDatabind: 'com.fasterxml.jackson.core:jackson-databind:2.8.9',
             jsr305: 'com.google.code.findbugs:jsr305:3.0.2',
             compositeRuntime: "com.jaynewstrom.composite:runtime:$compositeVersion",
     ]
