@@ -28,6 +28,7 @@ data class DeserializerFactoryBuilder(val deserializers: Collection<TypeName>) {
     private fun createConstructor(): MethodSpec {
         val constructorBuilder = MethodSpec.constructorBuilder()
         constructorBuilder.addModifiers(Modifier.PUBLIC)
+        constructorBuilder.addStatement("super(\$L)", deserializers.size)
         deserializers.forEach {
             val codeFormat = "register(new \$T())"
             constructorBuilder.addStatement(codeFormat, it)

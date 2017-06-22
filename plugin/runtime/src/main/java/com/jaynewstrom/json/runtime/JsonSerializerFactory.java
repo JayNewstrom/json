@@ -14,9 +14,11 @@ import java.util.Map;
 
 public class JsonSerializerFactory {
     private final Map<Class<?>, JsonSerializer<?>> serializerMap;
+    private final int initialMapSize;
 
-    public JsonSerializerFactory() {
-        serializerMap = new LinkedHashMap<>();
+    public JsonSerializerFactory(int initialMapSize) {
+        this.initialMapSize = initialMapSize;
+        serializerMap = new LinkedHashMap<>(initialMapCapacity(initialMapSize));
         register(BooleanJsonAdapter.INSTANCE);
         register(ByteJsonAdapter.INSTANCE);
         register(DoubleJsonAdapter.INSTANCE);
@@ -25,6 +27,11 @@ public class JsonSerializerFactory {
         register(LongJsonAdapter.INSTANCE);
         register(ShortJsonAdapter.INSTANCE);
         register(StringJsonAdapter.INSTANCE);
+    }
+
+    // Size the map so that it won't grow when initializing, with a little room for user registered serializers.
+    private static int initialMapCapacity(int initialMapSize) {
+        return (int) Math.ceil(initialMapSize / 0.75) + 15;
     }
 
     public final <T> JsonSerializer<T> get(Class<T> modelClass) {
@@ -38,5 +45,9 @@ public class JsonSerializerFactory {
 
     public final void registerAll(JsonSerializerFactory serializerFactory) {
         serializerMap.putAll(serializerFactory.serializerMap);
+    }
+
+    public final int getInitialMapSize() {
+        return initialMapSize;
     }
 }
