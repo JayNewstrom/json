@@ -74,7 +74,7 @@ class JsonPlugin : Plugin<Project> {
     private fun Project.dependencySetForName(name: String): DependencySet? {
         try {
             return configurations.getByName(name).dependencies
-        } catch(e: UnknownConfigurationException) {
+        } catch (e: UnknownConfigurationException) {
             return null
         }
     }

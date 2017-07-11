@@ -32,4 +32,33 @@ subprojects {
     repositories {
         jcenter()
     }
+    configureKotlinLint(it)
+}
+
+def configureKotlinLint(Project project) {
+    def closure = {
+        project.configurations {
+            ktlint
+        }
+
+        project.dependencies {
+            ktlint 'com.github.shyiko:ktlint:0.8.3'
+        }
+
+        def ktlintCheck = project.tasks.create('ktlintCheck', JavaExec.class) {
+            main = 'com.github.shyiko.ktlint.Main'
+            classpath = project.configurations.ktlint
+            args 'src/**/*.kt'
+        }
+
+        project.check.dependsOn ktlintCheck
+
+        project.tasks.create('ktlintFormat', JavaExec.class) {
+            main = 'com.github.shyiko.ktlint.Main'
+            classpath = project.configurations.ktlint
+            args '-r', 'src/**/*.kt'
+        }
+    }
+    project.plugins.withId('kotlin-android', closure)
+    project.plugins.withId('kotlin', closure)
 }

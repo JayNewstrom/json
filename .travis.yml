@@ -16,6 +16,7 @@ jdk:
 
 script:
   - ./gradlew test
+  - (cd plugin/ && ./gradlew check)
 
 branches:
   except:
