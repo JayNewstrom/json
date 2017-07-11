@@ -2,8 +2,16 @@ package com.jaynewstrom.json.compiler
 
 import com.squareup.javapoet.TypeSpec
 
-data class ModelDefinition(val packageName: String, val isPublic: Boolean, val name: String, val fields: List<FieldDefinition>, val createSerializer: Boolean,
-        val createDeserializer: Boolean, val useAutoValue: Boolean, val generateAutoValueBuilder: Boolean) {
+data class ModelDefinition(
+        private val packageName: String,
+        private val isPublic: Boolean,
+        private val name: String,
+        private val fields: List<FieldDefinition>,
+        val createSerializer: Boolean,
+        val createDeserializer: Boolean,
+        private val useAutoValue: Boolean,
+        private val generateAutoValueBuilder: Boolean
+) {
     fun modelTypeSpecs(): Collection<TypeSpec> {
         if (useAutoValue) {
             val types = mutableListOf(AutoValueModelBuilder(isPublic, name, fields).build())

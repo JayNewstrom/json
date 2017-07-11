@@ -9,7 +9,9 @@ import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
 import javax.lang.model.element.Modifier
 
-data class SerializerFactoryBuilder(val serializers: Collection<TypeName>) {
+data class SerializerFactoryBuilder(
+        private val serializers: Collection<TypeName>
+) {
     fun build(): TypeSpec {
         return TypeSpec.classBuilder("RealJsonSerializerFactory")
                 .addAnnotation(libraryModuleAnnotation())

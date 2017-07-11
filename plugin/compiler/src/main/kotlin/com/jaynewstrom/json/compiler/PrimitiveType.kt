@@ -3,8 +3,13 @@ package com.jaynewstrom.json.compiler
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeName
 
-internal enum class PrimitiveType(val typeName: TypeName, val identifier: String, val defaultValue: String, val parseMethod: String,
-        val serializeMethod: String) {
+internal enum class PrimitiveType(
+        private val typeName: TypeName,
+        private val identifier: String,
+        val defaultValue: String,
+        val parseMethod: String,
+        val serializeMethod: String
+) {
     BOOLEAN(TypeName.BOOLEAN, "boolean", "false", "getBooleanValue", "writeBoolean"),
     BYTE(TypeName.BYTE, "byte", "0", "getByteValue", "writeNumber"),
     SHORT(TypeName.SHORT, "short", "0", "getShortValue", "writeNumber"),

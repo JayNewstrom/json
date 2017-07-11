@@ -14,8 +14,12 @@ import com.squareup.javapoet.TypeSpec
 import java.io.IOException
 import javax.lang.model.element.Modifier
 
-internal data class ModelDeserializerBuilder(val name: String, val fields: List<FieldDefinition>, val useAutoValue: Boolean,
-        val generateAutoValueBuilder: Boolean) {
+internal data class ModelDeserializerBuilder(
+        private val name: String,
+        private val fields: List<FieldDefinition>,
+        private val useAutoValue: Boolean,
+        private val generateAutoValueBuilder: Boolean
+) {
     fun build(): TypeSpec {
         val jsonDeserializerType = ClassName.get(JsonDeserializer::class.java)
         return TypeSpec.classBuilder(JsonCompiler.deserializerName(name))

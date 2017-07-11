@@ -13,7 +13,11 @@ import com.squareup.javapoet.TypeSpec
 import java.io.IOException
 import javax.lang.model.element.Modifier
 
-internal data class ModelSerializerBuilder(val name: String, val fields: List<FieldDefinition>, val useAutoValue: Boolean) {
+internal data class ModelSerializerBuilder(
+        private val name: String,
+        private val fields: List<FieldDefinition>,
+        private val useAutoValue: Boolean
+) {
     fun build(): TypeSpec {
         val jsonFactoryType = ClassName.get(JsonSerializer::class.java)
         return TypeSpec.classBuilder(JsonCompiler.serializerName(name))

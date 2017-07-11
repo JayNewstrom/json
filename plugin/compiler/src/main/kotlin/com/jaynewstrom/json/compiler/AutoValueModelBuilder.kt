@@ -5,7 +5,11 @@ import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeSpec
 import javax.lang.model.element.Modifier
 
-internal data class AutoValueModelBuilder(val isPublic: Boolean, val name: String, val fields: List<FieldDefinition>) {
+internal data class AutoValueModelBuilder(
+        private val isPublic: Boolean,
+        private val name: String,
+        private val fields: List<FieldDefinition>
+) {
     fun build(): TypeSpec {
         val classBuilder = TypeSpec.interfaceBuilder("$name${JsonCompiler.INTERFACE_SUFFIX}")
         if (isPublic) {

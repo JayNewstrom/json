@@ -9,8 +9,13 @@ import com.squareup.javapoet.TypeName
 import java.io.File
 import java.util.ArrayList
 
-data class JsonModelDefinitionParser(val file: File, val createSerializerByDefault: Boolean,
-        val createDeserializerByDefault: Boolean, val useAutoValueByDefault: Boolean, val packageName: String) {
+data class JsonModelDefinitionParser(
+        private val file: File,
+        private val createSerializerByDefault: Boolean,
+        private val createDeserializerByDefault: Boolean,
+        private val useAutoValueByDefault: Boolean,
+        private val packageName: String
+) {
     fun parse(): ModelDefinition {
         val objectMapper = ObjectMapper()
         val modelJson = objectMapper.readTree(file)

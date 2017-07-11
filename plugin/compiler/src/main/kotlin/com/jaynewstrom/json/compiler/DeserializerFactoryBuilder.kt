@@ -9,7 +9,7 @@ import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
 import javax.lang.model.element.Modifier
 
-data class DeserializerFactoryBuilder(val deserializers: Collection<TypeName>) {
+data class DeserializerFactoryBuilder(private val deserializers: Collection<TypeName>) {
     fun build(): TypeSpec {
         return TypeSpec.classBuilder("RealJsonDeserializerFactory")
                 .addAnnotation(libraryModuleAnnotation())
