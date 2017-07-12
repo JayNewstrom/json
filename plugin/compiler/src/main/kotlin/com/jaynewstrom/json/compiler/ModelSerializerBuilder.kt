@@ -16,7 +16,7 @@ import javax.lang.model.element.Modifier
 internal data class ModelSerializerBuilder(
         private val name: String,
         private val fields: List<FieldDefinition>,
-        private val useAutoValue: Boolean
+        private val modelType: ModelType
 ) {
     fun build(): TypeSpec {
         val jsonFactoryType = ClassName.get(JsonSerializer::class.java)
@@ -80,13 +80,7 @@ internal data class ModelSerializerBuilder(
         return "serialize(model.${modelValue()}, $JSON_GENERATOR_VARIABLE_NAME, $SERIALIZER_FACTORY_VARIABLE_NAME)"
     }
 
-    private fun FieldDefinition.modelValue(): String {
-        if (useAutoValue) {
-            return "get${fieldName.capitalize()}()"
-        } else {
-            return fieldName
-        }
-    }
+    private fun FieldDefinition.modelValue() = modelType.valueCode(fieldName)
 
     companion object {
         private const val MODEL_VARIABLE_NAME = "model"

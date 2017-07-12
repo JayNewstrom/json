@@ -55,7 +55,6 @@ class JsonPlugin : Plugin<Project> {
                 jsonTask.defaultPackage = variant.generateBuildConfig.buildConfigPackageName
                 jsonTask.createSerializerByDefault = extension.createSerializerByDefault
                 jsonTask.createDeserializerByDefault = extension.createDeserializerByDefault
-                jsonTask.useAutoValueByDefault = extension.useAutoValueByDefault
             }
             task.group = "jsonmodel"
             task.buildDirectory = project.buildDir

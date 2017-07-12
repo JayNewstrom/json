@@ -17,8 +17,7 @@ import javax.lang.model.element.Modifier
 internal data class ModelDeserializerBuilder(
         private val name: String,
         private val fields: List<FieldDefinition>,
-        private val useAutoValue: Boolean,
-        private val generateAutoValueBuilder: Boolean
+        private val modelType: ModelType
 ) {
     fun build(): TypeSpec {
         val jsonDeserializerType = ClassName.get(JsonDeserializer::class.java)
@@ -82,43 +81,9 @@ internal data class ModelDeserializerBuilder(
         }
         methodBuilder.endControlFlow() // End while loop.
 
-        if (!useAutoValue) {
-            methodBuilder.addComment("Ensure required fields were parsed from json.")
-            fields.forEach { field ->
-                if (field.isRequired) {
-                    methodBuilder.beginControlFlow("if (${field.fieldName} == null)")
-                    methodBuilder.addStatement("throw new \$T(\$S)", NullPointerException::class.java, "${field.fieldName} == null")
-                    methodBuilder.endControlFlow()
-                }
-            }
-        }
-
+        modelType.ensureFieldsWereDeserialized(methodBuilder, fields)
         methodBuilder.addComment("Create the model given the parsed fields.")
-        if (generateAutoValueBuilder) {
-            val builderMethodChain = StringBuilder()
-            val callArguments = mutableListOf<String>()
-            fields.forEach { field ->
-                builderMethodChain.append("\n.set${field.fieldName.capitalize()}(\$L)")
-                callArguments.add(field.fieldName)
-            }
-            methodBuilder.addStatement("return new AutoValue_$name.Builder()$builderMethodChain\n.build()",
-                    *callArguments.toTypedArray())
-        } else {
-            val constructorCallArguments = StringBuilder()
-            fields.forEach { field ->
-                if (!constructorCallArguments.isEmpty()) {
-                    constructorCallArguments.append(", ")
-                }
-                constructorCallArguments.append(field.fieldName)
-            }
-            val type: String
-            if (useAutoValue) {
-                type = "AutoValue_$name"
-            } else {
-                type = name
-            }
-            methodBuilder.addStatement("return new \$N(\$L)", type, constructorCallArguments.toString())
-        }
+        modelType.createModel(name, methodBuilder, fields)
     }
 
     private fun FieldDefinition.defaultValue(): String {

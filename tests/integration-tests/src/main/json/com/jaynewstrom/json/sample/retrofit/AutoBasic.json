@@ -1,5 +1,5 @@
 {
-  "useAutoValue": true,
+  "modelType": "autoValue",
   "fields": [
     {"name": "foo", "type": "String"}
   ]

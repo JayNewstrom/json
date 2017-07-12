@@ -1,5 +1,5 @@
 {
-  "useAutoValue": true, "generateAutoValueBuilder": true,
+  "modelType": "autoValueWithBuilder",
   "fields": [
     {"name": "firstName", "type": "String"},
     {"name": "lastName", "type": "String"},

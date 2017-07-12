@@ -8,12 +8,14 @@ import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
 import java.io.File
 import java.util.ArrayList
+import com.squareup.kotlinpoet.ClassName as KotlinClassName
+import com.squareup.kotlinpoet.ParameterizedTypeName as KotlinParameterizedTypeName
+import com.squareup.kotlinpoet.TypeName as KotlinTypeName
 
 data class JsonModelDefinitionParser(
         private val file: File,
         private val createSerializerByDefault: Boolean,
         private val createDeserializerByDefault: Boolean,
-        private val useAutoValueByDefault: Boolean,
         private val packageName: String
 ) {
     fun parse(): ModelDefinition {
@@ -27,14 +29,9 @@ data class JsonModelDefinitionParser(
         }
         val createSerializer = modelJson.getBooleanOrDefault("createSerializer", createSerializerByDefault)
         val createDeserializer = modelJson.getBooleanOrDefault("createDeserializer", createDeserializerByDefault)
-        val useAutoValue = modelJson.getBooleanOrDefault("useAutoValue", useAutoValueByDefault)
-        val generateAutoValueBuilder = modelJson.getBooleanOrDefault("generateAutoValueBuilder", false)
-        if (!useAutoValue && generateAutoValueBuilder) {
-            throw IllegalStateException("Can't generate auto value builder interface without using auto value in ${file.path}.")
-        }
+        val modelType = ModelType.fromDescriptor(modelJson.get("modelType")?.asText() ?: "basic")
         onlyContains(modelJson, supportedTypeNames(), "type")
-        return ModelDefinition(packageName, isPublic, modelName, fieldDefinitions, createSerializer, createDeserializer, useAutoValue,
-                generateAutoValueBuilder)
+        return ModelDefinition(packageName, isPublic, modelName, fieldDefinitions, createSerializer, createDeserializer, modelType)
     }
 
     private fun parseField(fieldJson: JsonNode, modelIsPublic: Boolean): FieldDefinition {
@@ -42,15 +39,15 @@ data class JsonModelDefinitionParser(
         val fieldName = fieldJson.get("name").asText()
         val jsonName = if (fieldJson.has("jsonName")) fieldJson.get("jsonName").asText() else fieldName
         val typeName = fieldJson.get("type").asText()
-        var optionalType = PrimitiveType.typeNameFromIdentifier(typeName)
-        if (optionalType == null) {
-            optionalType = ClassName.bestGuess(typeName)
-        }
+        var type = PrimitiveType.typeNameFromIdentifier(typeName) ?: ClassName.bestGuess(typeName)
         val isList = fieldJson.getBooleanOrDefault("list", false)
         if (isList) {
-            optionalType = ParameterizedTypeName.get(ClassName.get("java.util", "List"), optionalType!!)
+            type = ParameterizedTypeName.get(ClassName.get("java.util", "List"), type)
         }
-        val type = optionalType!!
+        var kotlinType = PrimitiveType.kotlinTypeNameFromIdentifier(typeName) ?: KotlinClassName.bestGuess(typeName)
+        if (isList) {
+            kotlinType = KotlinParameterizedTypeName.get(KotlinClassName("kotlin.collections", "List"), kotlinType)
+        }
         val isRequired = fieldJson.getBooleanOrDefault("required", !type.isPrimitive)
         if (isRequired && type.isPrimitive) {
             throw IllegalStateException("Primitives can't be required.")
@@ -64,7 +61,7 @@ data class JsonModelDefinitionParser(
             customDeserializer = ClassName.bestGuess(fieldJson.get("customDeserializer").asText())
         }
         onlyContains(fieldJson, supportedFieldNames(), "field")
-        return FieldDefinition(isPublic, isRequired, type, fieldName, jsonName, customSerializer, customDeserializer)
+        return FieldDefinition(isPublic, isRequired, type, kotlinType, fieldName, jsonName, customSerializer, customDeserializer)
     }
 
     private fun JsonNode.getBooleanOrDefault(key: String, defaultValue: Boolean): Boolean {
@@ -80,7 +77,7 @@ data class JsonModelDefinitionParser(
     }
 
     private fun supportedTypeNames(): Set<String> {
-        return setOf("public", "fields", "createSerializer", "createDeserializer", "useAutoValue", "generateAutoValueBuilder")
+        return setOf("public", "fields", "createSerializer", "createDeserializer", "modelType")
     }
 
     private fun supportedFieldNames(): Set<String> {
