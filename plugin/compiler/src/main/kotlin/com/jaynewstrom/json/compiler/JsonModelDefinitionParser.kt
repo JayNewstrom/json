@@ -10,7 +10,6 @@ import java.io.File
 import java.util.ArrayList
 import com.squareup.kotlinpoet.ClassName as KotlinClassName
 import com.squareup.kotlinpoet.ParameterizedTypeName as KotlinParameterizedTypeName
-import com.squareup.kotlinpoet.TypeName as KotlinTypeName
 
 data class JsonModelDefinitionParser(
         private val file: File,
