@@ -6,6 +6,7 @@ import com.jaynewstrom.json.runtime.JsonSerializer
 import com.jaynewstrom.json.runtime.JsonSerializerFactory
 import com.jaynewstrom.json.runtime.internal.ListSerializer
 import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
@@ -24,8 +25,17 @@ internal data class ModelSerializerBuilder(
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addSuperinterface(ParameterizedTypeName.get(jsonFactoryType, JsonCompiler.jsonModelType(name)))
                 .addSuperinterface(ClassName.get(JsonRegistrable::class.java))
+                .addField(singletonInstanceField())
+                .addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build())
                 .addMethod(JsonCompiler.modelClassMethodSpec(name))
                 .addMethod(serializeMethodSpec())
+                .build()
+    }
+
+    private fun singletonInstanceField(): FieldSpec {
+        return FieldSpec.builder(ClassName.bestGuess(JsonCompiler.serializerName(name)), "INSTANCE")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .initializer("new \$L()", JsonCompiler.serializerName(name))
                 .build()
     }
 

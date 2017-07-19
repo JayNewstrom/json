@@ -32,7 +32,7 @@ data class SerializerFactoryBuilder(
         constructorBuilder.addModifiers(Modifier.PUBLIC)
         constructorBuilder.addStatement("super(\$L)", serializers.size)
         serializers.forEach {
-            val codeFormat = "register(new \$T())"
+            val codeFormat = "register(\$T.INSTANCE)"
             constructorBuilder.addStatement(codeFormat, it)
         }
         return constructorBuilder.build()

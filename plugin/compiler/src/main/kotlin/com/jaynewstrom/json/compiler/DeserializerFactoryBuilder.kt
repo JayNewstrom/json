@@ -30,7 +30,7 @@ data class DeserializerFactoryBuilder(private val deserializers: Collection<Type
         constructorBuilder.addModifiers(Modifier.PUBLIC)
         constructorBuilder.addStatement("super(\$L)", deserializers.size)
         deserializers.forEach {
-            val codeFormat = "register(new \$T())"
+            val codeFormat = "register(\$T.INSTANCE)"
             constructorBuilder.addStatement(codeFormat, it)
         }
         return constructorBuilder.build()
