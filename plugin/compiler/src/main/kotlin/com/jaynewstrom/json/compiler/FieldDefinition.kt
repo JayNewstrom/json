@@ -5,7 +5,7 @@ import com.squareup.kotlinpoet.TypeName as KotlinTypeName
 
 data class FieldDefinition(
         var isPublic: Boolean,
-        val isRequired: Boolean,
+        val nullable: Boolean,
         val type: TypeName,
         private val kotlinType: KotlinTypeName,
         val fieldName: String,
@@ -13,9 +13,7 @@ data class FieldDefinition(
         val customSerializer: TypeName?,
         val customDeserializer: TypeName?
 ) {
-    internal fun isNullable() = !isRequired && !type.isPrimitive
-
-    internal fun kotlinType() = if (isNullable()) {
+    internal fun kotlinType() = if (nullable) {
         kotlinType.asNullable()
     } else {
         kotlinType.asNonNullable()

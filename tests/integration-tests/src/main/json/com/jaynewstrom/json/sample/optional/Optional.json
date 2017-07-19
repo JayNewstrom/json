@@ -1,6 +1,6 @@
 {
   "fields": [
-    {"name": "one", "type": "String", "required": false},
-    {"name": "two", "type": "String", "required": false}
+    {"name": "one", "type": "String", "nullable": true},
+    {"name": "two", "type": "String", "nullable": true}
   ]
 }

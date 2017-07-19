@@ -53,7 +53,7 @@ An example json file is below.
       "public": false, // Not required, defaults to the types public flag.
       "jsonName": "foo", // Not required, defaults to the "name" property.
       "list": false, // Not required, defaults to false.
-      "required": true, // Not required, defaults to true if object, defaults to false if primitive.
+      "nullable": false, // Not required, defaults to false.
       "customSerializer": null, // Not required.
       "customDeserializer": null // Not required.
     }

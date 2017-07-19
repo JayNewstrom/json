@@ -35,7 +35,7 @@ internal data class AutoValueBuilderBuilder(
 
     private fun FieldDefinition.parameterSpec(): ParameterSpec {
         val parameterBuilder = ParameterSpec.builder(type, fieldName)
-        if (isNullable()) {
+        if (nullable) {
             parameterBuilder.addAnnotation(Nullable::class.java)
         }
         return parameterBuilder.build()

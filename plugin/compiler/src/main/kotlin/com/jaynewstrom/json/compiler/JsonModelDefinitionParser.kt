@@ -47,9 +47,9 @@ data class JsonModelDefinitionParser(
         if (isList) {
             kotlinType = KotlinParameterizedTypeName.get(KotlinClassName("kotlin.collections", "List"), kotlinType)
         }
-        val isRequired = fieldJson.getBooleanOrDefault("required", !type.isPrimitive)
-        if (isRequired && type.isPrimitive) {
-            throw IllegalStateException("Primitives can't be required.")
+        val nullable = fieldJson.getBooleanOrDefault("nullable", false)
+        if (nullable && type.isPrimitive) {
+            throw IllegalStateException("Primitives can't be nullable.")
         }
         var customSerializer: TypeName? = null
         if (fieldJson.hasNonNull("customSerializer")) {
@@ -60,7 +60,7 @@ data class JsonModelDefinitionParser(
             customDeserializer = ClassName.bestGuess(fieldJson.get("customDeserializer").asText())
         }
         onlyContains(fieldJson, supportedFieldNames(), "field")
-        return FieldDefinition(isPublic, isRequired, type, kotlinType, fieldName, jsonName, customSerializer, customDeserializer)
+        return FieldDefinition(isPublic, nullable, type, kotlinType, fieldName, jsonName, customSerializer, customDeserializer)
     }
 
     private fun JsonNode.getBooleanOrDefault(key: String, defaultValue: Boolean): Boolean {
@@ -80,6 +80,6 @@ data class JsonModelDefinitionParser(
     }
 
     private fun supportedFieldNames(): Set<String> {
-        return setOf("public", "name", "jsonName", "type", "list", "required", "customSerializer", "customDeserializer")
+        return setOf("public", "name", "jsonName", "type", "list", "nullable", "customSerializer", "customDeserializer")
     }
 }

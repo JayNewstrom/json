@@ -1,6 +1,6 @@
 {
   "modelType": "autoValue",
   "fields": [
-    {"name": "name", "type": "String", "required": false}
+    {"name": "name", "type": "String", "nullable": true}
   ]
 }

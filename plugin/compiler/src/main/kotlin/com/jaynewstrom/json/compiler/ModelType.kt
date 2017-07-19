@@ -30,7 +30,7 @@ internal sealed class ModelType {
         override fun ensureFieldsWereDeserialized(methodBuilder: MethodSpec.Builder, fields: List<FieldDefinition>) {
             methodBuilder.addComment("Ensure required fields were parsed from json.")
             fields.forEach { field ->
-                if (field.isRequired) {
+                if (!field.nullable && !field.type.isPrimitive) {
                     methodBuilder.beginControlFlow("if (${field.fieldName} == null)")
                     methodBuilder.addStatement("throw new \$T(\$S)", NullPointerException::class.java, "${field.fieldName} == null")
                     methodBuilder.endControlFlow()
