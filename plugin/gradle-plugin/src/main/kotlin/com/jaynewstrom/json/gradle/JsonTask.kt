@@ -51,8 +51,12 @@ open class JsonTask : SourceTask() {
                 deserializers.add(ClassName.get(packageName, JsonCompiler.deserializerName(jsonFileName)))
             }
         }
-        JavaFile.builder(defaultPackage, DeserializerFactoryBuilder(deserializers).build()).build().writeTo(outputDirectory)
-        JavaFile.builder(defaultPackage, SerializerFactoryBuilder(serializers).build()).build().writeTo(outputDirectory)
+        if (deserializers.isNotEmpty()) {
+            JavaFile.builder(defaultPackage, DeserializerFactoryBuilder(deserializers).build()).build().writeTo(outputDirectory)
+        }
+        if (serializers.isNotEmpty()) {
+            JavaFile.builder(defaultPackage, SerializerFactoryBuilder(serializers).build()).build().writeTo(outputDirectory)
+        }
         inputs.outOfDate { inputFileDetails ->
             val modelDefinition = fileModelDefinitionMap[inputFileDetails.file] ?: return@outOfDate
             createModelSpecificClasses(inputFileDetails.file, modelDefinition)
