@@ -54,8 +54,16 @@ internal data class ModelSerializerBuilder(
     private fun serializeMethodBody(methodBuilder: MethodSpec.Builder) {
         methodBuilder.addStatement("$JSON_GENERATOR_VARIABLE_NAME.writeStartObject()")
         fields.forEach { field ->
+            if (field.nullable) {
+                methodBuilder.beginControlFlow("if (\$L != null)", "model.${field.modelValue()}")
+            }
             methodBuilder.addStatement("$JSON_GENERATOR_VARIABLE_NAME.writeFieldName(\$S)", field.jsonName)
             field.serialize(methodBuilder)
+            if (field.nullable) {
+                methodBuilder.nextControlFlow("else")
+                methodBuilder.addStatement("$JSON_GENERATOR_VARIABLE_NAME.writeNullField(\$S)", field.jsonName)
+                methodBuilder.endControlFlow()
+            }
         }
         methodBuilder.addStatement("$JSON_GENERATOR_VARIABLE_NAME.writeEndObject()")
     }

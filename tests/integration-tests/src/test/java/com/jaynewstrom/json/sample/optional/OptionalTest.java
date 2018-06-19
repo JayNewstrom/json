@@ -24,4 +24,9 @@ public final class OptionalTest {
         assertThat(optional.one).isNull();
         assertThat(optional.two).isNull();
     }
+
+    @Test public void ensureNullIsSerialized() {
+        String result = new JsonTestHelper().serialize(new Optional(null, "Two"));
+        assertThat(result).isEqualTo("{\"one\":null,\"two\":\"Two\"}");
+    }
 }
