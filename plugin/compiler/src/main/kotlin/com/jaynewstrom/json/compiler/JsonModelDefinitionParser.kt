@@ -6,16 +6,16 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import java.io.File
 import java.util.ArrayList
 import com.squareup.kotlinpoet.ClassName as KotlinClassName
-import com.squareup.kotlinpoet.ParameterizedTypeName as KotlinParameterizedTypeName
 
 data class JsonModelDefinitionParser(
-        private val file: File,
-        private val createSerializerByDefault: Boolean,
-        private val createDeserializerByDefault: Boolean,
-        private val packageName: String
+    private val file: File,
+    private val createSerializerByDefault: Boolean,
+    private val createDeserializerByDefault: Boolean,
+    private val packageName: String
 ) {
     fun parse(): ModelDefinition {
         val objectMapper = ObjectMapper()
@@ -45,7 +45,7 @@ data class JsonModelDefinitionParser(
         }
         var kotlinType = PrimitiveType.kotlinTypeNameFromIdentifier(typeName) ?: KotlinClassName.bestGuess(typeName)
         if (isList) {
-            kotlinType = KotlinParameterizedTypeName.get(KotlinClassName("kotlin.collections", "List"), kotlinType)
+            kotlinType = KotlinClassName("kotlin.collections", "List").parameterizedBy(kotlinType)
         }
         val nullable = fieldJson.getBooleanOrDefault("nullable", false)
         if (nullable && type.isPrimitive) {

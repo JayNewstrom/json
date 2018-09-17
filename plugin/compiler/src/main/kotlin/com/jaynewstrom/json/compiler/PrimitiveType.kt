@@ -6,12 +6,12 @@ import com.squareup.kotlinpoet.ClassName as KotlinClassName
 import com.squareup.kotlinpoet.TypeName as KotlinTypeName
 
 internal enum class PrimitiveType(
-        private val typeName: TypeName,
-        private val kotlinTypeName: KotlinTypeName,
-        private val identifier: String,
-        val defaultValue: String,
-        val parseMethod: String,
-        val serializeMethod: String
+    private val typeName: TypeName,
+    private val kotlinTypeName: KotlinTypeName,
+    private val identifier: String,
+    val defaultValue: String,
+    val parseMethod: String,
+    val serializeMethod: String
 ) {
     BOOLEAN(TypeName.BOOLEAN, com.squareup.kotlinpoet.BOOLEAN, "boolean", "false", "getBooleanValue", "writeBoolean"),
     BYTE(TypeName.BYTE, com.squareup.kotlinpoet.BYTE, "byte", "0", "getByteValue", "writeNumber"),

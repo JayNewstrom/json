@@ -18,7 +18,6 @@ apply plugin: 'com.jaynewstrom.json'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '26.0.0'
 
     defaultConfig {
         minSdkVersion 15
@@ -28,12 +27,12 @@ android {
 
 dependencies {
     annotationProcessor 'com.google.auto.value:auto-value:1.4.1'
-    provided 'com.jakewharton.auto.value:auto-value-annotations:1.4'
-    compile "com.jaynewstrom.json:retrofit-converter:$ARTIFACT_VERSION"
+    compileOnly 'com.jakewharton.auto.value:auto-value-annotations:1.4'
+    api "com.jaynewstrom.json:retrofit-converter:$ARTIFACT_VERSION"
 
-    testCompile dep.junit
-    testCompile dep.fest
-    testCompile 'com.squareup.okhttp3:mockwebserver:3.8.1'
+    testImplementation dep.junit
+    testImplementation dep.fest
+    testImplementation 'com.squareup.okhttp3:mockwebserver:3.8.1'
 }
 
 json {

@@ -2,18 +2,18 @@ package com.jaynewstrom.json.compiler
 
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.TypeSpec
-import com.squareup.kotlinpoet.KotlinFile
+import com.squareup.kotlinpoet.FileSpec
 import java.io.File
 import com.squareup.kotlinpoet.TypeSpec as KotlinTypeSpec
 
 data class ModelDefinition internal constructor(
-        private val packageName: String,
-        private val isPublic: Boolean,
-        private val name: String,
-        private val fields: List<FieldDefinition>,
-        val createSerializer: Boolean,
-        val createDeserializer: Boolean,
-        private val modelType: ModelType
+    private val packageName: String,
+    private val isPublic: Boolean,
+    private val name: String,
+    private val fields: List<FieldDefinition>,
+    val createSerializer: Boolean,
+    val createDeserializer: Boolean,
+    private val modelType: ModelType
 ) {
     fun createModels(outputDirectory: File) {
         when (modelType) {
@@ -40,6 +40,6 @@ data class ModelDefinition internal constructor(
     }
 
     private fun File.writeKotlin(typeSpec: KotlinTypeSpec) {
-        KotlinFile.get(packageName, typeSpec).writeTo(this)
+        FileSpec.get(packageName, typeSpec).writeTo(this)
     }
 }

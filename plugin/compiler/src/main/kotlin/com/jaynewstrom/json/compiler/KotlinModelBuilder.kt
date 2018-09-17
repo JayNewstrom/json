@@ -6,9 +6,9 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 
 internal data class KotlinModelBuilder(
-        private val isPublic: Boolean,
-        private val name: String,
-        private val fields: List<FieldDefinition>
+    private val isPublic: Boolean,
+    private val name: String,
+    private val fields: List<FieldDefinition>
 ) {
     fun build(): TypeSpec {
         val classBuilder = TypeSpec.classBuilder(name)

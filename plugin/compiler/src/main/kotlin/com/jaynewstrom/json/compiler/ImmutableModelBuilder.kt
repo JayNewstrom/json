@@ -7,9 +7,9 @@ import com.squareup.javapoet.TypeSpec
 import javax.lang.model.element.Modifier
 
 internal data class ImmutableModelBuilder(
-        private val isPublic: Boolean,
-        private val name: String,
-        private val fields: List<FieldDefinition>
+    private val isPublic: Boolean,
+    private val name: String,
+    private val fields: List<FieldDefinition>
 ) {
     fun build(): TypeSpec {
         val classBuilder = TypeSpec.classBuilder(name)

@@ -15,9 +15,9 @@ import java.io.IOException
 import javax.lang.model.element.Modifier
 
 internal data class ModelSerializerBuilder(
-        private val name: String,
-        private val fields: List<FieldDefinition>,
-        private val modelType: ModelType
+    private val name: String,
+    private val fields: List<FieldDefinition>,
+    private val modelType: ModelType
 ) {
     fun build(): TypeSpec {
         val jsonFactoryType = ClassName.get(JsonSerializer::class.java)
