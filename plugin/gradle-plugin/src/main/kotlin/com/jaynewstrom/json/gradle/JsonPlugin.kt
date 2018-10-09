@@ -15,7 +15,6 @@ import org.gradle.api.artifacts.DependencyResolutionListener
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.ResolvableDependencies
 import org.gradle.api.artifacts.UnknownConfigurationException
-import java.io.File
 
 class JsonPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -59,10 +58,8 @@ class JsonPlugin : Plugin<Project> {
             task.group = "jsonmodel"
             task.buildDirectory = project.buildDir
             task.description = "Generate Json Models and Factories for ${variant.name}"
-            task.source("src")
-            task.include("**/json/**/*.$FILE_EXTENSION".replace('/', File.separatorChar))
-            task.exclude("**${File.separatorChar}resources${File.separatorChar}**")
-            task.exclude("**${File.separatorChar}assets${File.separatorChar}**")
+            task.source(variant.sourceSets.map { sourceSet -> "src/${sourceSet.name}/json" })
+            task.include("**/*.$FILE_EXTENSION")
 
             generateJsonModel.dependsOn(task)
 
