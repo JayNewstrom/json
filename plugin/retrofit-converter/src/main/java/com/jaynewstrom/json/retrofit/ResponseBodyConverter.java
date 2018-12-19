@@ -25,7 +25,9 @@ final class ResponseBodyConverter<T> implements Converter<ResponseBody, T> {
         try {
             JsonParser jsonParser = jsonFactory.createParser(value.charStream());
             jsonParser.nextToken();
-            return deserializer.deserialize(jsonParser, deserializerFactory);
+            T returnValue = deserializer.deserialize(jsonParser, deserializerFactory);
+            jsonParser.close();
+            return returnValue;
         } finally {
             value.close();
         }
