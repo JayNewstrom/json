@@ -13,9 +13,5 @@ data class FieldDefinition(
     val customSerializer: TypeName?,
     val customDeserializer: TypeName?
 ) {
-    internal fun kotlinType() = if (nullable) {
-        kotlinType.asNullable()
-    } else {
-        kotlinType.asNonNullable()
-    }
+    internal fun kotlinType() = kotlinType.copy(nullable = nullable)
 }

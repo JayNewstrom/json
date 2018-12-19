@@ -32,7 +32,7 @@ dependencies {
 
     testImplementation dep.junit
     testImplementation dep.fest
-    testImplementation 'com.squareup.okhttp3:mockwebserver:3.8.1'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:3.12.0'
 }
 
 json {
