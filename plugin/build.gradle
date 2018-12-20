@@ -4,7 +4,6 @@ ext {
 
     dep = [
             androidPlugin: 'com.android.tools.build:gradle:3.2.1',
-            javaPoet: 'com.squareup:javapoet:1.11.1',
             kotlinPoet: 'com.squareup:kotlinpoet:1.0.0',
             kotlinStdLib: "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
             kotlinReflect: "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",

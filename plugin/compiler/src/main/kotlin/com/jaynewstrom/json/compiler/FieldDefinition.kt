@@ -1,17 +1,13 @@
 package com.jaynewstrom.json.compiler
 
-import com.squareup.javapoet.TypeName
-import com.squareup.kotlinpoet.TypeName as KotlinTypeName
+import com.squareup.kotlinpoet.TypeName
 
-data class FieldDefinition(
-    var isPublic: Boolean,
-    val nullable: Boolean,
+internal data class FieldDefinition(
+    val isPublic: Boolean,
     val type: TypeName,
-    private val kotlinType: KotlinTypeName,
+    val primitiveType: PrimitiveType?,
     val fieldName: String,
     val jsonName: String,
     val customSerializer: TypeName?,
     val customDeserializer: TypeName?
-) {
-    internal fun kotlinType() = kotlinType.copy(nullable = nullable)
-}
+)

@@ -5,7 +5,6 @@ sourceSets {
 }
 
 dependencies {
-    compile dep.javaPoet
     compile dep.kotlinPoet
     compile dep.kotlinStdLib
     compile dep.jacksonDatabind

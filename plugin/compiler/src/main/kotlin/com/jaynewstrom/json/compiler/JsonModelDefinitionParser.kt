@@ -3,13 +3,12 @@ package com.jaynewstrom.json.compiler
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.ParameterizedTypeName
-import com.squareup.javapoet.TypeName
+import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.TypeName
+import com.squareup.kotlinpoet.asClassName
 import java.io.File
 import java.util.ArrayList
-import com.squareup.kotlinpoet.ClassName as KotlinClassName
 
 data class JsonModelDefinitionParser(
     private val file: File,
@@ -28,9 +27,8 @@ data class JsonModelDefinitionParser(
         }
         val createSerializer = modelJson.getBooleanOrDefault("createSerializer", createSerializerByDefault)
         val createDeserializer = modelJson.getBooleanOrDefault("createDeserializer", createDeserializerByDefault)
-        val modelType = ModelType.fromDescriptor(modelJson.get("modelType")?.asText() ?: "basic")
         onlyContains(modelJson, supportedTypeNames(), "type")
-        return ModelDefinition(packageName, isPublic, modelName, fieldDefinitions, createSerializer, createDeserializer, modelType)
+        return ModelDefinition(packageName, isPublic, modelName, fieldDefinitions, createSerializer, createDeserializer)
     }
 
     private fun parseField(fieldJson: JsonNode, modelIsPublic: Boolean): FieldDefinition {
@@ -38,18 +36,15 @@ data class JsonModelDefinitionParser(
         val fieldName = fieldJson.get("name").asText()
         val jsonName = if (fieldJson.has("jsonName")) fieldJson.get("jsonName").asText() else fieldName
         val typeName = fieldJson.get("type").asText()
-        var type = PrimitiveType.typeNameFromIdentifier(typeName) ?: ClassName.bestGuess(typeName)
         val isList = fieldJson.getBooleanOrDefault("list", false)
+        val primitiveType = PrimitiveType.fromIdentifier(typeName)
+        var kotlinType: TypeName = primitiveType?.kotlinTypeName ?: ClassName.bestGuess(typeName)
         if (isList) {
-            type = ParameterizedTypeName.get(ClassName.get("java.util", "List"), type)
-        }
-        var kotlinType = PrimitiveType.kotlinTypeNameFromIdentifier(typeName) ?: KotlinClassName.bestGuess(typeName)
-        if (isList) {
-            kotlinType = KotlinClassName("kotlin.collections", "List").parameterizedBy(kotlinType)
+            kotlinType = List::class.asClassName().parameterizedBy(kotlinType)
         }
         val nullable = fieldJson.getBooleanOrDefault("nullable", false)
-        if (nullable && type.isPrimitive) {
-            throw IllegalStateException("Primitives can't be nullable.")
+        if (nullable) {
+            kotlinType = kotlinType.copy(nullable = nullable)
         }
         var customSerializer: TypeName? = null
         if (fieldJson.hasNonNull("customSerializer")) {
@@ -60,7 +55,7 @@ data class JsonModelDefinitionParser(
             customDeserializer = ClassName.bestGuess(fieldJson.get("customDeserializer").asText())
         }
         onlyContains(fieldJson, supportedFieldNames(), "field")
-        return FieldDefinition(isPublic, nullable, type, kotlinType, fieldName, jsonName, customSerializer, customDeserializer)
+        return FieldDefinition(isPublic, kotlinType, primitiveType, fieldName, jsonName, customSerializer, customDeserializer)
     }
 
     private fun JsonNode.getBooleanOrDefault(key: String, defaultValue: Boolean): Boolean {
@@ -76,7 +71,7 @@ data class JsonModelDefinitionParser(
     }
 
     private fun supportedTypeNames(): Set<String> {
-        return setOf("public", "fields", "createSerializer", "createDeserializer", "modelType")
+        return setOf("public", "fields", "createSerializer", "createDeserializer")
     }
 
     private fun supportedFieldNames(): Set<String> {

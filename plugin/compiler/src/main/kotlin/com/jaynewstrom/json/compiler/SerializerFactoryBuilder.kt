@@ -2,37 +2,32 @@ package com.jaynewstrom.json.compiler
 
 import com.jaynewstrom.composite.runtime.LibraryModule
 import com.jaynewstrom.json.runtime.JsonSerializerFactory
-import com.squareup.javapoet.AnnotationSpec
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.TypeName
-import com.squareup.javapoet.TypeSpec
-import javax.lang.model.element.Modifier
+import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.TypeSpec
 
 data class SerializerFactoryBuilder(
-    private val serializers: Collection<TypeName>
+    private val serializers: Collection<TypeSpec>
 ) {
     fun build(): TypeSpec {
         return TypeSpec.classBuilder("RealJsonSerializerFactory")
-                .addAnnotation(libraryModuleAnnotation())
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .superclass(ClassName.get(JsonSerializerFactory::class.java))
-                .addMethod(createConstructor())
-                .build()
+            .addAnnotation(libraryModuleAnnotation())
+            .superclass(JsonSerializerFactory::class.java)
+            .addFunction(createConstructor())
+            .build()
     }
 
     private fun libraryModuleAnnotation(): AnnotationSpec {
         return AnnotationSpec.builder(LibraryModule::class.java)
-                .addMember("value", "\$T.class", JsonSerializerFactory::class.java)
-                .build()
+            .addMember("value", "\$T.class", JsonSerializerFactory::class.java)
+            .build()
     }
 
-    private fun createConstructor(): MethodSpec {
-        val constructorBuilder = MethodSpec.constructorBuilder()
-        constructorBuilder.addModifiers(Modifier.PUBLIC)
+    private fun createConstructor(): FunSpec {
+        val constructorBuilder = FunSpec.constructorBuilder()
         constructorBuilder.addStatement("super(\$L)", serializers.size)
         serializers.forEach {
-            val codeFormat = "register(\$T.INSTANCE)"
+            val codeFormat = "register(\$T)"
             constructorBuilder.addStatement(codeFormat, it)
         }
         return constructorBuilder.build()

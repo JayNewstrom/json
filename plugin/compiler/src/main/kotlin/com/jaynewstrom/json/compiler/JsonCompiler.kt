@@ -1,42 +1,37 @@
 package com.jaynewstrom.json.compiler
 
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.ParameterizedTypeName
-import com.squareup.javapoet.WildcardTypeName
+import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import java.io.File
-import javax.lang.model.element.Modifier
+import java.io.IOException
 
-class JsonCompiler {
-    companion object {
-        const val DESERIALIZER_SUFFIX = "Deserializer"
-        const val SERIALIZER_SUFFIX = "Serializer"
-        const val INTERFACE_SUFFIX = "Interface"
-        const val INTERFACE_BUILDER_SUFFIX = "BuilderInterface"
+internal object JsonCompiler {
+    fun deserializerName(jsonFileName: String) = jsonFileName + "Deserializer"
 
-        const val FILE_EXTENSION = "json"
+    fun serializerName(jsonFileName: String) = jsonFileName + "Serializer"
 
-        val OUTPUT_DIRECTORY = listOf("generated", "source", "json")
+    fun nameFromFile(file: File): String {
+        return file.name.substring(0, file.name.indexOf(file.extension) - 1)
+    }
 
-        fun deserializerName(jsonFileName: String) = jsonFileName + DESERIALIZER_SUFFIX
+    fun jsonModelType(modelName: String): ClassName {
+        return ClassName.bestGuess(modelName)
+    }
 
-        fun serializerName(jsonFileName: String) = jsonFileName + SERIALIZER_SUFFIX
+    fun modelClassFunSpec(modelName: String): FunSpec {
+        return FunSpec.builder("modelClass")
+            .addModifiers(KModifier.OVERRIDE)
+            .returns(Class::class.parameterizedBy(Any::class))
+            .addStatement("return \$T.class", JsonCompiler.jsonModelType(modelName))
+            .build()
+    }
 
-        fun nameFromFile(file: File): String {
-            return file.name.substring(0, file.name.indexOf(file.extension) - 1)
-        }
-
-        fun jsonModelType(modelName: String): ClassName {
-            return ClassName.bestGuess(modelName)
-        }
-
-        fun modelClassMethodSpec(modelName: String): MethodSpec {
-            return MethodSpec.methodBuilder("modelClass")
-                    .addAnnotation(Override::class.java)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(ParameterizedTypeName.get(ClassName.get(Class::class.java), WildcardTypeName.subtypeOf(Any::class.java)))
-                    .addStatement("return \$T.class", JsonCompiler.jsonModelType(modelName))
-                    .build()
-        }
+    fun throwsIoExceptionAnnotation(): AnnotationSpec {
+        return AnnotationSpec.builder(Throws::class)
+            .addMember("value", "%T::class", IOException::class)
+            .build()
     }
 }

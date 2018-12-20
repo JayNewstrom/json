@@ -18,8 +18,8 @@ internal data class KotlinModelBuilder(
         }
         val constructor = FunSpec.constructorBuilder().addModifiers(KModifier.INTERNAL)
         fields.forEach { field ->
-            classBuilder.addProperty(PropertySpec.builder(field.fieldName, field.kotlinType()).initializer(field.fieldName).build())
-            constructor.addParameter(field.fieldName, field.kotlinType())
+            classBuilder.addProperty(PropertySpec.builder(field.fieldName, field.type).initializer(field.fieldName).build())
+            constructor.addParameter(field.fieldName, field.type)
         }
         classBuilder.primaryConstructor(constructor.build())
         return classBuilder.build()

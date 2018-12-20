@@ -5,61 +5,50 @@ import com.jaynewstrom.json.runtime.JsonRegistrable
 import com.jaynewstrom.json.runtime.JsonSerializer
 import com.jaynewstrom.json.runtime.JsonSerializerFactory
 import com.jaynewstrom.json.runtime.internal.ListSerializer
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.FieldSpec
-import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.ParameterizedTypeName
-import com.squareup.javapoet.TypeName
-import com.squareup.javapoet.TypeSpec
-import java.io.IOException
-import javax.lang.model.element.Modifier
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.ParameterizedTypeName
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.TypeName
+import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.asTypeName
 
 internal data class ModelSerializerBuilder(
     private val name: String,
-    private val fields: List<FieldDefinition>,
-    private val modelType: ModelType
+    private val fields: List<FieldDefinition>
 ) {
     fun build(): TypeSpec {
-        val jsonFactoryType = ClassName.get(JsonSerializer::class.java)
-        return TypeSpec.classBuilder(JsonCompiler.serializerName(name))
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addSuperinterface(ParameterizedTypeName.get(jsonFactoryType, JsonCompiler.jsonModelType(name)))
-                .addSuperinterface(ClassName.get(JsonRegistrable::class.java))
-                .addField(singletonInstanceField())
-                .addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build())
-                .addMethod(JsonCompiler.modelClassMethodSpec(name))
-                .addMethod(serializeMethodSpec())
-                .build()
+        val jsonFactoryType = JsonSerializer::class.asTypeName()
+        return TypeSpec.objectBuilder(JsonCompiler.serializerName(name))
+            .addSuperinterface(jsonFactoryType.parameterizedBy(JsonCompiler.jsonModelType(name)))
+            .addSuperinterface(JsonRegistrable::class.java)
+            .addFunction(JsonCompiler.modelClassFunSpec(name))
+            .addFunction(serializeFunSpec())
+            .build()
     }
 
-    private fun singletonInstanceField(): FieldSpec {
-        return FieldSpec.builder(ClassName.bestGuess(JsonCompiler.serializerName(name)), "INSTANCE")
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                .initializer("new \$L()", JsonCompiler.serializerName(name))
-                .build()
-    }
-
-    private fun serializeMethodSpec(): MethodSpec {
-        val methodBuilder = MethodSpec.methodBuilder("serialize")
-                .addException(IOException::class.java)
-                .addAnnotation(Override::class.java)
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(JsonCompiler.jsonModelType(name), MODEL_VARIABLE_NAME)
-                .addParameter(JsonGenerator::class.java, JSON_GENERATOR_VARIABLE_NAME)
-                .addParameter(JsonSerializerFactory::class.java, SERIALIZER_FACTORY_VARIABLE_NAME)
+    private fun serializeFunSpec(): FunSpec {
+        val methodBuilder = FunSpec.builder("serialize")
+            .addAnnotation(JsonCompiler.throwsIoExceptionAnnotation())
+            .addModifiers(KModifier.OVERRIDE)
+            .addParameter(ParameterSpec.builder(MODEL_VARIABLE_NAME, JsonCompiler.jsonModelType(name)).build())
+            .addParameter(ParameterSpec.builder(JSON_GENERATOR_VARIABLE_NAME, JsonGenerator::class).build())
+            .addParameter(ParameterSpec.builder(SERIALIZER_FACTORY_VARIABLE_NAME, JsonSerializerFactory::class).build())
         serializeMethodBody(methodBuilder)
         return methodBuilder.build()
     }
 
-    private fun serializeMethodBody(methodBuilder: MethodSpec.Builder) {
+    private fun serializeMethodBody(methodBuilder: FunSpec.Builder) {
         methodBuilder.addStatement("$JSON_GENERATOR_VARIABLE_NAME.writeStartObject()")
         fields.forEach { field ->
-            if (field.nullable) {
-                methodBuilder.beginControlFlow("if (\$L != null)", "model.${field.modelValue()}")
+            val nullable = field.type.isNullable
+            if (nullable) {
+                methodBuilder.beginControlFlow("if (\$L != null)", "model.${field.fieldName}")
             }
             methodBuilder.addStatement("$JSON_GENERATOR_VARIABLE_NAME.writeFieldName(\$S)", field.jsonName)
             field.serialize(methodBuilder)
-            if (field.nullable) {
+            if (nullable) {
                 methodBuilder.nextControlFlow("else")
                 methodBuilder.addStatement("$JSON_GENERATOR_VARIABLE_NAME.writeNullField(\$S)", field.jsonName)
                 methodBuilder.endControlFlow()
@@ -68,13 +57,12 @@ internal data class ModelSerializerBuilder(
         methodBuilder.addStatement("$JSON_GENERATOR_VARIABLE_NAME.writeEndObject()")
     }
 
-    private fun FieldDefinition.serialize(methodBuilder: MethodSpec.Builder) {
-        val primitiveType = PrimitiveType.fromTypeNameOrBoxedTypeName(type)
+    private fun FieldDefinition.serialize(methodBuilder: FunSpec.Builder) {
         if (customSerializer == null && primitiveType != null) {
-            methodBuilder.addStatement("$JSON_GENERATOR_VARIABLE_NAME.${primitiveType.serializeMethod}(model.${modelValue()})")
-        } else if (type is ParameterizedTypeName && type.rawType == ClassName.get("java.util", "List")) {
+            methodBuilder.addStatement("$JSON_GENERATOR_VARIABLE_NAME.${primitiveType.serializeMethod}(model.$fieldName)")
+        } else if (type is ParameterizedTypeName && type.rawType == List::class.asTypeName()) {
             val modelType = type.typeArguments[0]
-            val listSerializerType = ClassName.get(ListSerializer::class.java)
+            val listSerializerType = ListSerializer::class.asTypeName()
             val serializer = getSerializer(modelType)
             val codeFormat = "new \$T<>(${serializer.code}).${callSerialize()}"
             methodBuilder.addStatement(codeFormat, listSerializerType, serializer.codeArgument)
@@ -87,18 +75,16 @@ internal data class ModelSerializerBuilder(
     private data class FieldSerializerResult(val code: String, val codeArgument: TypeName)
 
     private fun FieldDefinition.getSerializer(typeName: TypeName): FieldSerializerResult {
-        if (customSerializer == null) {
-            return FieldSerializerResult("$SERIALIZER_FACTORY_VARIABLE_NAME.get(\$T.class)", typeName)
+        return if (customSerializer == null) {
+            FieldSerializerResult("$SERIALIZER_FACTORY_VARIABLE_NAME.get(\$T::class.java)", typeName)
         } else {
-            return FieldSerializerResult("new \$T()", customSerializer)
+            FieldSerializerResult("\$T", customSerializer)
         }
     }
 
     private fun FieldDefinition.callSerialize(): String {
-        return "serialize(model.${modelValue()}, $JSON_GENERATOR_VARIABLE_NAME, $SERIALIZER_FACTORY_VARIABLE_NAME)"
+        return "serialize(model.$fieldName, $JSON_GENERATOR_VARIABLE_NAME, $SERIALIZER_FACTORY_VARIABLE_NAME)"
     }
-
-    private fun FieldDefinition.modelValue() = modelType.valueCode(fieldName)
 
     companion object {
         private const val MODEL_VARIABLE_NAME = "model"

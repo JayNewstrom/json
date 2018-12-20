@@ -1,15 +1,13 @@
 package com.jaynewstrom.json.gradle
 
 import com.jaynewstrom.json.compiler.DeserializerFactoryBuilder
-import com.jaynewstrom.json.compiler.JsonCompiler
 import com.jaynewstrom.json.compiler.JsonModelDefinitionParser
 import com.jaynewstrom.json.compiler.ModelDefinition
 import com.jaynewstrom.json.compiler.SerializerFactoryBuilder
 import com.jaynewstrom.json.compiler.VERSION
 import com.jaynewstrom.json.compiler.relativePath
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.JavaFile
-import com.squareup.javapoet.TypeName
+import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.TypeSpec
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
@@ -32,39 +30,37 @@ open class JsonTask : SourceTask() {
     var buildDirectory: File? = null
         set(value) {
             field = value
-            outputDirectory = JsonCompiler.OUTPUT_DIRECTORY.fold(buildDirectory, ::File)
+            outputDirectory = listOf("generated", "source", "json").fold(buildDirectory, ::File)
         }
 
     @TaskAction fun execute(inputs: IncrementalTaskInputs) {
         val fileModelDefinitionMap = linkedMapOf<File, ModelDefinition>()
-        val deserializers = arrayListOf<TypeName>()
-        val serializers = arrayListOf<TypeName>()
+        val deserializers = arrayListOf<TypeSpec>()
+        val serializers = arrayListOf<TypeSpec>()
         getInputs().files.forEach { file ->
-            val packageName = file.relativePackage()
-            val jsonFileName = JsonCompiler.nameFromFile(file)
             val modelDefinition = modelDefinition(file)
-            fileModelDefinitionMap.put(file, modelDefinition)
+            fileModelDefinitionMap[file] = modelDefinition
             if (modelDefinition.createSerializer) {
-                serializers.add(ClassName.get(packageName, JsonCompiler.serializerName(jsonFileName)))
+                serializers.add(modelDefinition.serializerTypeSpec)
             }
             if (modelDefinition.createDeserializer) {
-                deserializers.add(ClassName.get(packageName, JsonCompiler.deserializerName(jsonFileName)))
+                deserializers.add(modelDefinition.deserializerTypeSpec)
             }
         }
         inputs.outOfDate { inputFileDetails ->
             removeFilesAssociatedWithDefinition(inputFileDetails.file)
             val modelDefinition = fileModelDefinitionMap[inputFileDetails.file] ?: return@outOfDate
-            createModelSpecificClasses(inputFileDetails.file, modelDefinition)
+            createModelSpecificClasses(modelDefinition)
         }
         if (deserializers.isNotEmpty()) {
-            JavaFile.builder(defaultPackage, DeserializerFactoryBuilder(deserializers).build()).build().writeTo(outputDirectory)
+            FileSpec.get(defaultPackage, DeserializerFactoryBuilder(deserializers).build()).writeTo(outputDirectory!!)
         } else {
-            removeGeneratedInDefaultPackage("RealJsonDeserializerFactory.java")
+            removeGeneratedInDefaultPackage("RealJsonDeserializerFactory.kt")
         }
         if (serializers.isNotEmpty()) {
-            JavaFile.builder(defaultPackage, SerializerFactoryBuilder(serializers).build()).build().writeTo(outputDirectory)
+            FileSpec.get(defaultPackage, SerializerFactoryBuilder(serializers).build()).writeTo(outputDirectory!!)
         } else {
-            removeGeneratedInDefaultPackage("RealJsonSerializerFactory.java")
+            removeGeneratedInDefaultPackage("RealJsonSerializerFactory.kt")
         }
         inputs.removed { inputFileDetails ->
             removeFilesAssociatedWithDefinition(inputFileDetails.file)
@@ -77,30 +73,14 @@ open class JsonTask : SourceTask() {
         return JsonModelDefinitionParser(file, createSerializerByDefault, createDeserializerByDefault, file.relativePackage()).parse()
     }
 
-    private fun createModelSpecificClasses(file: File, modelDefinition: ModelDefinition) {
-        val packageName = file.relativePackage()
+    private fun createModelSpecificClasses(modelDefinition: ModelDefinition) {
         modelDefinition.createModels(outputDirectory!!)
-        if (modelDefinition.createSerializer) {
-            JavaFile.builder(packageName, modelDefinition.serializerTypeSpec()).build().writeTo(outputDirectory)
-        }
-        if (modelDefinition.createDeserializer) {
-            JavaFile.builder(packageName, modelDefinition.deserializerTypeSpec()).build().writeTo(outputDirectory)
-        }
     }
 
     private fun removeFilesAssociatedWithDefinition(definitionFile: File) {
         val directory = File(outputDirectory, definitionFile.relativePackage().replace('.', File.separatorChar))
         val fileName = definitionFile.nameWithoutExtension
-        // We don't know the files that were generated, so try to remove all possibilities.
-        val filesToRemove = arrayOf(
-            "$fileName.java", // The immutable model generated by default (no suffix).
-            "$fileName.kt", // The kotlin model.
-            "$fileName${JsonCompiler.SERIALIZER_SUFFIX}.java",
-            "$fileName${JsonCompiler.DESERIALIZER_SUFFIX}.java"
-        )
-        filesToRemove.forEach { fileNameToRemove ->
-            File(directory, fileNameToRemove).delete()
-        }
+        File(directory, "$fileName.kt").delete()
     }
 
     private fun removeGeneratedInDefaultPackage(fileName: String) {

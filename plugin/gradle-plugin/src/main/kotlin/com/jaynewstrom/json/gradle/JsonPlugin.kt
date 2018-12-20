@@ -6,7 +6,6 @@ import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.api.BaseVariant
 import com.jaynewstrom.json.compiler.COMPOSITE_VERSION
-import com.jaynewstrom.json.compiler.JsonCompiler.Companion.FILE_EXTENSION
 import com.jaynewstrom.json.compiler.VERSION
 import org.gradle.api.DomainObjectSet
 import org.gradle.api.Plugin
@@ -21,9 +20,9 @@ class JsonPlugin : Plugin<Project> {
         project.plugins.all {
             when (it) {
                 is AppPlugin -> configureAndroid(project,
-                        project.extensions.getByType(AppExtension::class.java).applicationVariants)
+                    project.extensions.getByType(AppExtension::class.java).applicationVariants)
                 is LibraryPlugin -> configureAndroid(project,
-                        project.extensions.getByType(LibraryExtension::class.java).libraryVariants)
+                    project.extensions.getByType(LibraryExtension::class.java).libraryVariants)
             }
         }
     }
@@ -59,7 +58,7 @@ class JsonPlugin : Plugin<Project> {
             task.buildDirectory = project.buildDir
             task.description = "Generate Json Models and Factories for ${variant.name}"
             task.source(variant.sourceSets.map { sourceSet -> "src/${sourceSet.name}/json" })
-            task.include("**/*.$FILE_EXTENSION")
+            task.include("**/*.json")
 
             generateJsonModel.dependsOn(task)
 

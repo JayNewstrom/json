@@ -6,77 +6,69 @@ import com.jaynewstrom.json.runtime.JsonDeserializer
 import com.jaynewstrom.json.runtime.JsonDeserializerFactory
 import com.jaynewstrom.json.runtime.JsonRegistrable
 import com.jaynewstrom.json.runtime.internal.ListDeserializer
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.FieldSpec
-import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.ParameterizedTypeName
-import com.squareup.javapoet.TypeName
-import com.squareup.javapoet.TypeSpec
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.ParameterizedTypeName
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.TypeName
+import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.asTypeName
 import java.io.IOException
-import javax.lang.model.element.Modifier
 
 internal data class ModelDeserializerBuilder(
     private val name: String,
-    private val fields: List<FieldDefinition>,
-    private val modelType: ModelType
+    private val fields: List<FieldDefinition>
 ) {
     fun build(): TypeSpec {
-        val jsonDeserializerType = ClassName.get(JsonDeserializer::class.java)
-        return TypeSpec.classBuilder(JsonCompiler.deserializerName(name))
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addSuperinterface(ParameterizedTypeName.get(jsonDeserializerType, JsonCompiler.jsonModelType(name)))
-                .addSuperinterface(ClassName.get(JsonRegistrable::class.java))
-                .addField(singletonInstanceField())
-                .addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build())
-                .addMethod(JsonCompiler.modelClassMethodSpec(name))
-                .addMethod(deserializeMethodSpec())
-                .build()
+        val jsonDeserializerType = JsonDeserializer::class.asTypeName()
+        return TypeSpec.objectBuilder(JsonCompiler.deserializerName(name))
+            .addSuperinterface(jsonDeserializerType.parameterizedBy(JsonCompiler.jsonModelType(name)))
+            .addSuperinterface(JsonRegistrable::class)
+            .addFunction(JsonCompiler.modelClassFunSpec(name))
+            .addFunction(deserializeMethodSpec())
+            .build()
     }
 
-    private fun singletonInstanceField(): FieldSpec {
-        return FieldSpec.builder(ClassName.bestGuess(JsonCompiler.deserializerName(name)), "INSTANCE")
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                .initializer("new \$L()", JsonCompiler.deserializerName(name))
-                .build()
-    }
-
-    private fun deserializeMethodSpec(): MethodSpec {
-        val methodBuilder = MethodSpec.methodBuilder("deserialize")
-                .addException(IOException::class.java)
-                .addAnnotation(Override::class.java)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(JsonCompiler.jsonModelType(name))
-                .addParameter(JsonParser::class.java, JSON_PARSER_VARIABLE_NAME)
-                .addParameter(JsonDeserializerFactory::class.java, DESERIALIZER_FACTORY_VARIABLE_NAME)
+    private fun deserializeMethodSpec(): FunSpec {
+        val methodBuilder = FunSpec.builder("deserialize")
+            .addAnnotation(JsonCompiler.throwsIoExceptionAnnotation())
+            .addModifiers(KModifier.OVERRIDE)
+            .returns(JsonCompiler.jsonModelType(name))
+            .addParameter(ParameterSpec.builder(JSON_PARSER_VARIABLE_NAME, JsonParser::class).build())
+            .addParameter(ParameterSpec.builder(DESERIALIZER_FACTORY_VARIABLE_NAME, JsonDeserializerFactory::class.java).build())
         deserializeMethodBody(methodBuilder)
         return methodBuilder.build()
     }
 
-    private fun deserializeMethodBody(methodBuilder: MethodSpec.Builder) {
+    private fun deserializeMethodBody(methodBuilder: FunSpec.Builder) {
         methodBuilder.addComment("Ensure we are in the correct state.")
         methodBuilder.beginControlFlow("if ($JSON_PARSER_VARIABLE_NAME.currentToken() != \$T.\$L)", JsonToken::class.java,
-                JsonToken.START_OBJECT)
-        methodBuilder.addStatement("throw new \$T(\$S)", IOException::class.java, "Expected data to start with an Object")
+            JsonToken.START_OBJECT)
+        methodBuilder.addStatement("throw \$T(\$S)", IOException::class.java, "Expected data to start with an Object")
         methodBuilder.endControlFlow()
 
         methodBuilder.addComment("Initialize variables.")
         fields.forEach { field ->
-            methodBuilder.addStatement("\$T ${field.fieldName} = ${field.defaultValue()}", field.type)
+            if (field.primitiveType != null && !field.type.isNullable) {
+                methodBuilder.addStatement("var ${field.fieldName}: \$T = ${field.primitiveType.defaultValue}", field.type)
+            } else {
+                methodBuilder.addStatement("lateinit var ${field.fieldName}: \$T", field.type)
+            }
         }
 
         methodBuilder.addComment("Parse fields as they come.")
         methodBuilder.beginControlFlow("while ($JSON_PARSER_VARIABLE_NAME.nextToken() != \$T.\$L)", JsonToken::class.java,
-                JsonToken.END_OBJECT)
-        methodBuilder.addStatement("String fieldName = $JSON_PARSER_VARIABLE_NAME.getCurrentName()")
-        methodBuilder.addStatement("\$T nextToken = $JSON_PARSER_VARIABLE_NAME.nextToken()", JsonToken::class.java)
-        methodBuilder.beginControlFlow("if (nextToken == \$T.\$L)", JsonToken::class.java,
-                JsonToken.VALUE_NULL)
+            JsonToken.END_OBJECT)
+        methodBuilder.addStatement("val fieldName = $JSON_PARSER_VARIABLE_NAME.getCurrentName()")
+        methodBuilder.addStatement("val nextToken = $JSON_PARSER_VARIABLE_NAME.nextToken()")
+        methodBuilder.beginControlFlow("if (nextToken == \$T.\$L)", JsonToken::class.java, JsonToken.VALUE_NULL)
         methodBuilder.addStatement("continue")
         methodBuilder.endControlFlow()
         if (fields.isNotEmpty()) {
             var addElse = false
             fields.forEach { field ->
-                val fieldEqualsIfStatement = "if (fieldName.equals(\"${field.jsonName}\"))"
+                val fieldEqualsIfStatement = "if (fieldName == \"${field.jsonName}\")"
                 if (addElse) {
                     methodBuilder.nextControlFlow("else $fieldEqualsIfStatement")
                 } else {
@@ -91,28 +83,18 @@ internal data class ModelDeserializerBuilder(
         }
         methodBuilder.endControlFlow() // End while loop.
 
-        modelType.ensureFieldsWereDeserialized(methodBuilder, fields)
         methodBuilder.addComment("Create the model given the parsed fields.")
-        modelType.createModel(name, methodBuilder, fields)
+        createModel(methodBuilder)
     }
 
-    private fun FieldDefinition.defaultValue(): String {
-        if (type.isPrimitive) {
-            return PrimitiveType.fromTypeName(type).defaultValue
-        } else {
-            return "null"
-        }
-    }
-
-    private fun FieldDefinition.assignVariable(methodBuilder: MethodSpec.Builder) {
-        val primitiveType = PrimitiveType.fromTypeNameOrBoxedTypeName(type)
+    private fun FieldDefinition.assignVariable(methodBuilder: FunSpec.Builder) {
         if (customDeserializer == null && primitiveType != null) {
             methodBuilder.addStatement("$fieldName = $JSON_PARSER_VARIABLE_NAME.${primitiveType.parseMethod}()")
-        } else if (type is ParameterizedTypeName && type.rawType == ClassName.get("java.util", "List")) {
+        } else if (type is ParameterizedTypeName && type.rawType == List::class.asTypeName()) {
             val modelType = type.typeArguments[0]
-            val listDeserializerType = ClassName.get(ListDeserializer::class.java)
+            val listDeserializerType = ListDeserializer::class.java.asTypeName()
             val deserializer = getDeserializer(modelType)
-            val codeFormat = "$fieldName = new \$T<>(${deserializer.code}).${callDeserialize()}"
+            val codeFormat = "$fieldName = \$T<>(${deserializer.code}).${callDeserialize()}"
             methodBuilder.addStatement(codeFormat, listDeserializerType, deserializer.codeArgument)
         } else {
             val deserializer = getDeserializer(type)
@@ -120,13 +102,24 @@ internal data class ModelDeserializerBuilder(
         }
     }
 
+    private fun createModel(methodBuilder: FunSpec.Builder) {
+        val constructorCallArguments = StringBuilder()
+        fields.forEach { field ->
+            if (!constructorCallArguments.isEmpty()) {
+                constructorCallArguments.append(", ")
+            }
+            constructorCallArguments.append(field.fieldName)
+        }
+        methodBuilder.addStatement("return $name(\$L)", constructorCallArguments.toString())
+    }
+
     private data class FieldDeserializerResult(val code: String, val codeArgument: TypeName)
 
     private fun FieldDefinition.getDeserializer(typeName: TypeName): FieldDeserializerResult {
-        if (customDeserializer == null) {
-            return FieldDeserializerResult("$DESERIALIZER_FACTORY_VARIABLE_NAME.get(\$T.class)", typeName)
+        return if (customDeserializer == null) {
+            FieldDeserializerResult("$DESERIALIZER_FACTORY_VARIABLE_NAME.get(\$T.class)", typeName)
         } else {
-            return FieldDeserializerResult("new \$T()", customDeserializer)
+            FieldDeserializerResult("\$T", customDeserializer)
         }
     }
 

@@ -1,10 +1,8 @@
 package com.jaynewstrom.json.compiler
 
-import com.squareup.javapoet.JavaFile
-import com.squareup.javapoet.TypeSpec
 import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.TypeSpec
 import java.io.File
-import com.squareup.kotlinpoet.TypeSpec as KotlinTypeSpec
 
 data class ModelDefinition internal constructor(
     private val packageName: String,
@@ -12,29 +10,20 @@ data class ModelDefinition internal constructor(
     private val name: String,
     private val fields: List<FieldDefinition>,
     val createSerializer: Boolean,
-    val createDeserializer: Boolean,
-    private val modelType: ModelType
+    val createDeserializer: Boolean
 ) {
+    val serializerTypeSpec: TypeSpec by lazy(LazyThreadSafetyMode.NONE) { ModelSerializerBuilder(name, fields).build() }
+    val deserializerTypeSpec: TypeSpec by lazy(LazyThreadSafetyMode.NONE) { ModelDeserializerBuilder(name, fields).build() }
+
     fun createModels(outputDirectory: File) {
-        when (modelType) {
-            ModelType.BasicJava -> outputDirectory.writeJava(ImmutableModelBuilder(isPublic, name, fields).build())
-            ModelType.KotlinData -> outputDirectory.writeKotlin(KotlinModelBuilder(isPublic, name, fields).build())
+        val typeBuilder = FileSpec.builder(packageName, name)
+        typeBuilder.addType(KotlinModelBuilder(isPublic, name, fields).build())
+        if (createSerializer) {
+            typeBuilder.addType(serializerTypeSpec)
         }
-    }
-
-    fun deserializerTypeSpec(): TypeSpec {
-        return ModelDeserializerBuilder(name, fields, modelType).build()
-    }
-
-    fun serializerTypeSpec(): TypeSpec {
-        return ModelSerializerBuilder(name, fields, modelType).build()
-    }
-
-    private fun File.writeJava(typeSpec: TypeSpec) {
-        JavaFile.builder(packageName, typeSpec).build().writeTo(this)
-    }
-
-    private fun File.writeKotlin(typeSpec: KotlinTypeSpec) {
-        FileSpec.get(packageName, typeSpec).writeTo(this)
+        if (createDeserializer) {
+            typeBuilder.addType(deserializerTypeSpec)
+        }
+        typeBuilder.build().writeTo(outputDirectory)
     }
 }
