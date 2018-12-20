@@ -1,10 +1,10 @@
-apply plugin: 'java'
+apply plugin: 'kotlin'
 
 sourceCompatibility = 1.7
 
 dependencies {
     compile dep.jackson
-    compileOnly dep.jsr305
+    compile dep.kotlinStdLib
 }
 
 apply from: rootProject.file('publish.gradle')
