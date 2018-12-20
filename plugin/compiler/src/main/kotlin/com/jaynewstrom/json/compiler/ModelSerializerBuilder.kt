@@ -44,13 +44,13 @@ internal data class ModelSerializerBuilder(
         fields.forEach { field ->
             val nullable = field.type.isNullable
             if (nullable) {
-                methodBuilder.beginControlFlow("if (\$L != null)", "model.${field.fieldName}")
+                methodBuilder.beginControlFlow("if (%L != null)", "$MODEL_VARIABLE_NAME.${field.fieldName}")
             }
-            methodBuilder.addStatement("$JSON_GENERATOR_VARIABLE_NAME.writeFieldName(\$S)", field.jsonName)
+            methodBuilder.addStatement("$JSON_GENERATOR_VARIABLE_NAME.writeFieldName(%S)", field.jsonName)
             field.serialize(methodBuilder)
             if (nullable) {
                 methodBuilder.nextControlFlow("else")
-                methodBuilder.addStatement("$JSON_GENERATOR_VARIABLE_NAME.writeNullField(\$S)", field.jsonName)
+                methodBuilder.addStatement("$JSON_GENERATOR_VARIABLE_NAME.writeNullField(%S)", field.jsonName)
                 methodBuilder.endControlFlow()
             }
         }
@@ -59,12 +59,12 @@ internal data class ModelSerializerBuilder(
 
     private fun FieldDefinition.serialize(methodBuilder: FunSpec.Builder) {
         if (customSerializer == null && primitiveType != null) {
-            methodBuilder.addStatement("$JSON_GENERATOR_VARIABLE_NAME.${primitiveType.serializeMethod}(model.$fieldName)")
+            methodBuilder.addStatement("$JSON_GENERATOR_VARIABLE_NAME.${primitiveType.serializeMethod}($MODEL_VARIABLE_NAME.$fieldName${primitiveType.conversionForSerializeMethod})")
         } else if (type is ParameterizedTypeName && type.rawType == List::class.asTypeName()) {
             val modelType = type.typeArguments[0]
             val listSerializerType = ListSerializer::class.asTypeName()
             val serializer = getSerializer(modelType)
-            val codeFormat = "new \$T<>(${serializer.code}).${callSerialize()}"
+            val codeFormat = "new %T<>(${serializer.code}).${callSerialize()}"
             methodBuilder.addStatement(codeFormat, listSerializerType, serializer.codeArgument)
         } else {
             val serializer = getSerializer(type)
@@ -76,18 +76,18 @@ internal data class ModelSerializerBuilder(
 
     private fun FieldDefinition.getSerializer(typeName: TypeName): FieldSerializerResult {
         return if (customSerializer == null) {
-            FieldSerializerResult("$SERIALIZER_FACTORY_VARIABLE_NAME.get(\$T::class.java)", typeName)
+            FieldSerializerResult("$SERIALIZER_FACTORY_VARIABLE_NAME.get(%T::class.java)", typeName)
         } else {
-            FieldSerializerResult("\$T", customSerializer)
+            FieldSerializerResult("%T", customSerializer)
         }
     }
 
     private fun FieldDefinition.callSerialize(): String {
-        return "serialize(model.$fieldName, $JSON_GENERATOR_VARIABLE_NAME, $SERIALIZER_FACTORY_VARIABLE_NAME)"
+        return "serialize($MODEL_VARIABLE_NAME.$fieldName, $JSON_GENERATOR_VARIABLE_NAME, $SERIALIZER_FACTORY_VARIABLE_NAME)"
     }
 
     companion object {
-        private const val MODEL_VARIABLE_NAME = "model"
+        private const val MODEL_VARIABLE_NAME = "value"
         private const val JSON_GENERATOR_VARIABLE_NAME = "jg"
         private const val SERIALIZER_FACTORY_VARIABLE_NAME = "serializerFactory"
     }

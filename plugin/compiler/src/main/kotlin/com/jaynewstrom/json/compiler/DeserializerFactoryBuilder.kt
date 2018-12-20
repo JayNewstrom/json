@@ -17,15 +17,15 @@ data class DeserializerFactoryBuilder(private val deserializers: Collection<Type
 
     private fun libraryModuleAnnotation(): AnnotationSpec {
         return AnnotationSpec.builder(LibraryModule::class.java)
-            .addMember("value", "\$T.class", JsonDeserializerFactory::class.java)
+            .addMember("value", "%T.class", JsonDeserializerFactory::class.java)
             .build()
     }
 
     private fun createConstructor(): FunSpec {
         val constructorBuilder = FunSpec.constructorBuilder()
-        constructorBuilder.addStatement("super(\$L)", deserializers.size)
+        constructorBuilder.addStatement("super(%L)", deserializers.size)
         deserializers.forEach {
-            val codeFormat = "register(\$T)"
+            val codeFormat = "register(%T)"
             constructorBuilder.addStatement(codeFormat, it)
         }
         return constructorBuilder.build()

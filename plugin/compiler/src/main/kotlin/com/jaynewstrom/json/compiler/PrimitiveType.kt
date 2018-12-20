@@ -9,14 +9,18 @@ internal enum class PrimitiveType(
     val serializeMethod: String
 ) {
     BOOLEAN(com.squareup.kotlinpoet.BOOLEAN, "false", "getBooleanValue", "writeBoolean"),
-    BYTE(com.squareup.kotlinpoet.BYTE, "0", "getByteValue", "writeNumber"),
+    BYTE(com.squareup.kotlinpoet.BYTE, "0", "getByteValue", "writeNumber") {
+        override val conversionForSerializeMethod: String = ".toShort()"
+    },
     SHORT(com.squareup.kotlinpoet.SHORT, "0", "getShortValue", "writeNumber"),
     INT(com.squareup.kotlinpoet.INT, "0", "getIntValue", "writeNumber"),
     LONG(com.squareup.kotlinpoet.LONG, "0", "getLongValue", "writeNumber"),
     FLOAT(com.squareup.kotlinpoet.FLOAT, "0.0f", "getFloatValue", "writeNumber"),
-    DOUBLE(com.squareup.kotlinpoet.DOUBLE, "0.0d", "getDoubleValue", "writeNumber"),
+    DOUBLE(com.squareup.kotlinpoet.DOUBLE, "0.0", "getDoubleValue", "writeNumber"),
     STRING(ClassName("kotlin", "String"), "null", "getText", "writeString"),
     ;
+
+    open val conversionForSerializeMethod: String = ""
 
     companion object {
         fun fromIdentifier(identifier: String): PrimitiveType? = values().firstOrNull { identifier == it.kotlinTypeName.simpleName }

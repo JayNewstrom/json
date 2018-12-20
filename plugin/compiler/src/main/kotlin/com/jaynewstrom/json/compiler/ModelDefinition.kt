@@ -17,7 +17,7 @@ data class ModelDefinition internal constructor(
 
     fun createModels(outputDirectory: File) {
         val typeBuilder = FileSpec.builder(packageName, name)
-        typeBuilder.addType(KotlinModelBuilder(isPublic, name, fields).build())
+        typeBuilder.addType(ModelBuilder(isPublic, name, fields).build())
         if (createSerializer) {
             typeBuilder.addType(serializerTypeSpec)
         }

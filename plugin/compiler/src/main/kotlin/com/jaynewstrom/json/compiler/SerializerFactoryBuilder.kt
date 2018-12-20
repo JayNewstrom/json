@@ -19,15 +19,15 @@ data class SerializerFactoryBuilder(
 
     private fun libraryModuleAnnotation(): AnnotationSpec {
         return AnnotationSpec.builder(LibraryModule::class.java)
-            .addMember("value", "\$T.class", JsonSerializerFactory::class.java)
+            .addMember("value", "%T.class", JsonSerializerFactory::class.java)
             .build()
     }
 
     private fun createConstructor(): FunSpec {
         val constructorBuilder = FunSpec.constructorBuilder()
-        constructorBuilder.addStatement("super(\$L)", serializers.size)
+        constructorBuilder.addStatement("super(%L)", serializers.size)
         serializers.forEach {
-            val codeFormat = "register(\$T)"
+            val codeFormat = "register(%T)"
             constructorBuilder.addStatement(codeFormat, it)
         }
         return constructorBuilder.build()

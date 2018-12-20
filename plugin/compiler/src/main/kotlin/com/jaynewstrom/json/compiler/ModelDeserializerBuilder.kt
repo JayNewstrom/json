@@ -43,26 +43,28 @@ internal data class ModelDeserializerBuilder(
 
     private fun deserializeMethodBody(methodBuilder: FunSpec.Builder) {
         methodBuilder.addComment("Ensure we are in the correct state.")
-        methodBuilder.beginControlFlow("if ($JSON_PARSER_VARIABLE_NAME.currentToken() != \$T.\$L)", JsonToken::class.java,
+        methodBuilder.beginControlFlow("if ($JSON_PARSER_VARIABLE_NAME.currentToken() != %T.%L)", JsonToken::class.java,
             JsonToken.START_OBJECT)
-        methodBuilder.addStatement("throw \$T(\$S)", IOException::class.java, "Expected data to start with an Object")
+        methodBuilder.addStatement("throw %T(%S)", IOException::class.java, "Expected data to start with an Object")
         methodBuilder.endControlFlow()
 
         methodBuilder.addComment("Initialize variables.")
         fields.forEach { field ->
-            if (field.primitiveType != null && !field.type.isNullable) {
-                methodBuilder.addStatement("var ${field.fieldName}: \$T = ${field.primitiveType.defaultValue}", field.type)
+            if (field.primitiveType != null && !field.type.isNullable && field.primitiveType != PrimitiveType.STRING) {
+                methodBuilder.addStatement("var ${field.fieldName}: %T = ${field.primitiveType.defaultValue}", field.type)
+            } else if (field.type.isNullable) {
+                methodBuilder.addStatement("var ${field.fieldName}: %T = null", field.type)
             } else {
-                methodBuilder.addStatement("lateinit var ${field.fieldName}: \$T", field.type)
+                methodBuilder.addStatement("lateinit var ${field.fieldName}: %T", field.type)
             }
         }
 
         methodBuilder.addComment("Parse fields as they come.")
-        methodBuilder.beginControlFlow("while ($JSON_PARSER_VARIABLE_NAME.nextToken() != \$T.\$L)", JsonToken::class.java,
+        methodBuilder.beginControlFlow("while ($JSON_PARSER_VARIABLE_NAME.nextToken() != %T.%L)", JsonToken::class.java,
             JsonToken.END_OBJECT)
         methodBuilder.addStatement("val fieldName = $JSON_PARSER_VARIABLE_NAME.getCurrentName()")
         methodBuilder.addStatement("val nextToken = $JSON_PARSER_VARIABLE_NAME.nextToken()")
-        methodBuilder.beginControlFlow("if (nextToken == \$T.\$L)", JsonToken::class.java, JsonToken.VALUE_NULL)
+        methodBuilder.beginControlFlow("if (nextToken == %T.%L)", JsonToken::class.java, JsonToken.VALUE_NULL)
         methodBuilder.addStatement("continue")
         methodBuilder.endControlFlow()
         if (fields.isNotEmpty()) {
@@ -94,7 +96,7 @@ internal data class ModelDeserializerBuilder(
             val modelType = type.typeArguments[0]
             val listDeserializerType = ListDeserializer::class.java.asTypeName()
             val deserializer = getDeserializer(modelType)
-            val codeFormat = "$fieldName = \$T<>(${deserializer.code}).${callDeserialize()}"
+            val codeFormat = "$fieldName = %T<>(${deserializer.code}).${callDeserialize()}"
             methodBuilder.addStatement(codeFormat, listDeserializerType, deserializer.codeArgument)
         } else {
             val deserializer = getDeserializer(type)
@@ -110,16 +112,16 @@ internal data class ModelDeserializerBuilder(
             }
             constructorCallArguments.append(field.fieldName)
         }
-        methodBuilder.addStatement("return $name(\$L)", constructorCallArguments.toString())
+        methodBuilder.addStatement("return $name(%L)", constructorCallArguments.toString())
     }
 
     private data class FieldDeserializerResult(val code: String, val codeArgument: TypeName)
 
     private fun FieldDefinition.getDeserializer(typeName: TypeName): FieldDeserializerResult {
         return if (customDeserializer == null) {
-            FieldDeserializerResult("$DESERIALIZER_FACTORY_VARIABLE_NAME.get(\$T.class)", typeName)
+            FieldDeserializerResult("$DESERIALIZER_FACTORY_VARIABLE_NAME.get(%T.class)", typeName)
         } else {
-            FieldDeserializerResult("\$T", customDeserializer)
+            FieldDeserializerResult("%T", customDeserializer)
         }
     }
 
