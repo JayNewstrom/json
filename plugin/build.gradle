@@ -9,6 +9,7 @@ ext {
             kotlinStdLib: "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
             kotlinReflect: "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
             kotlinGradlePlugin: "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion",
+            retrofit: 'com.squareup.retrofit2:retrofit:2.5.0',
             jackson: 'com.fasterxml.jackson.core:jackson-core:2.9.8',
             jacksonDatabind: 'com.fasterxml.jackson.core:jackson-databind:2.9.8',
             jsr305: 'com.google.code.findbugs:jsr305:3.0.2',
