@@ -44,10 +44,6 @@ public final class JsonConverterFactoryTest {
         @POST("test") Call<Void> callBasicRequestWithList(@Body List<Basic> list);
 
         @POST("test") Call<Void> callBasicRequestWithNestedList(@Body List<List<Basic>> list);
-
-        @POST("test") Call<AutoBasic> callAutoBasicResponse();
-
-        @POST("test") Call<Void> callAutoBasicRequest(@Body AutoBasic basic);
     }
 
     private static final class Unknown {
@@ -149,23 +145,5 @@ public final class JsonConverterFactoryTest {
         RecordedRequest request = mockWebServer.takeRequest();
         assertThat(request.getHeader("Content-Type")).isEqualTo("application/json; charset=UTF-8");
         assertThat(request.getBody().readUtf8()).isEqualTo("[[{\"foo\":\"bar\"}]]");
-    }
-
-    @Test public void testResponseConverterUsingAutoValue() throws InterruptedException, IOException {
-        mockWebServer.enqueue(new MockResponse().setBody("{\"foo\":\"bar\"}"));
-        Call<AutoBasic> call = service().callAutoBasicResponse();
-        Response<AutoBasic> response = call.execute();
-        AutoBasic responseBody = response.body();
-        assertThat(responseBody.getFoo()).isEqualTo("bar");
-    }
-
-    @Test public void testRequestConverterUsingAutoValue() throws InterruptedException, IOException {
-        mockWebServer.enqueue(new MockResponse());
-        AutoBasic requestBody = new AutoValue_AutoBasic("bar");
-        Call<Void> call = service().callAutoBasicRequest(requestBody);
-        call.execute();
-        RecordedRequest request = mockWebServer.takeRequest();
-        assertThat(request.getHeader("Content-Type")).isEqualTo("application/json; charset=UTF-8");
-        assertThat(request.getBody().readUtf8()).isEqualTo("{\"foo\":\"bar\"}");
     }
 }

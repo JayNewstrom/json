@@ -3,25 +3,6 @@ package com.jaynewstrom.json.compiler
 import com.squareup.javapoet.MethodSpec
 
 internal sealed class ModelType {
-    object AutoValue : ModelType() {
-        override fun createModel(modelName: String, methodBuilder: MethodSpec.Builder, fields: List<FieldDefinition>) {
-            defaultModelCreator("AutoValue_$modelName", methodBuilder, fields)
-        }
-    }
-
-    object AutoValueWithBuilder : ModelType() {
-        override fun createModel(modelName: String, methodBuilder: MethodSpec.Builder, fields: List<FieldDefinition>) {
-            val builderMethodChain = StringBuilder()
-            val callArguments = mutableListOf<String>()
-            fields.forEach { field ->
-                builderMethodChain.append("\n.set${field.fieldName.capitalize()}(\$L)")
-                callArguments.add(field.fieldName)
-            }
-            methodBuilder.addStatement("return new AutoValue_$modelName.Builder()$builderMethodChain\n.build()",
-                    *callArguments.toTypedArray())
-        }
-    }
-
     object BasicJava : ModelType() {
         override fun valueCode(fieldName: String): String {
             return fieldName
@@ -70,8 +51,6 @@ internal sealed class ModelType {
 
     companion object {
         fun fromDescriptor(modelTypeDescriptor: String) = when (modelTypeDescriptor) {
-            "autoValue" -> ModelType.AutoValue
-            "autoValueWithBuilder" -> ModelType.AutoValueWithBuilder
             "basic" -> ModelType.BasicJava
             "kotlinData" -> ModelType.KotlinData
             else -> throw IllegalArgumentException("modelTypeDescriptor not supported: $modelTypeDescriptor")

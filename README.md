@@ -44,8 +44,6 @@ An example json file is below.
   "public": false, // Not required, defaults to false.
   "createSerializer": true, // Not required, defaults to false.
   "createDeserializer": false, // Not required, defaults to false.
-  "useAutoValue": true, // Not required, defaults to false.
-  "generateAutoValueBuilder": true, // Not required, defaults to false.
   "fields": [
     {
       "name": "foo", // Required!
@@ -77,22 +75,6 @@ Working with other json parsers
 Want to work with data that is a little more dynamic? Want to use jackson-databind? Have models that aren't performance critical?
 You can use a custom `JsonSerializer` or `JsonDeserializer` to bridge the gap between the libraries!
 Just call `realJsonDeserializerFactory.register(...)` or `realJsonSerializerFactory.register(...)` to register your custom (de)serializers.
-
-Use with AutoValue
-------------------
-```groovy
-dependencies {
-    ...
-    annotationProcessor 'com.google.auto.value:auto-value:1.3'
-    provided 'com.jakewharton.auto.value:auto-value-annotations:1.3'
-}
-```
-
-Specify the "useAutoValue" property on your model definition.
-This will generate an interface with the suffix of `Interface`.
-A model defined as `SkiResort.json` will generate an interface of `SkiResortInterface.java`.
-It's expected that you will extend this interface and add anything extra here (no extra properties!).
-The generated (de)serializers expect your class that extends `SkiResortInterface` to be name `SkiResort`.
 
 Use with Retrofit
 -----------------

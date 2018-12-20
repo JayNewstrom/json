@@ -17,11 +17,6 @@ data class ModelDefinition internal constructor(
 ) {
     fun createModels(outputDirectory: File) {
         when (modelType) {
-            ModelType.AutoValueWithBuilder -> {
-                outputDirectory.writeJava(AutoValueModelBuilder(isPublic, name, fields).build())
-                outputDirectory.writeJava(AutoValueBuilderBuilder(packageName, isPublic, name, fields).build())
-            }
-            ModelType.AutoValue -> outputDirectory.writeJava(AutoValueModelBuilder(isPublic, name, fields).build())
             ModelType.BasicJava -> outputDirectory.writeJava(ImmutableModelBuilder(isPublic, name, fields).build())
             ModelType.KotlinData -> outputDirectory.writeKotlin(KotlinModelBuilder(isPublic, name, fields).build())
         }
