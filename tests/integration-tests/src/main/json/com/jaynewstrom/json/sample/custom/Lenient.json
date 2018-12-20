@@ -2,7 +2,7 @@
   "fields": [
     {
       "name": "foo",
-      "type": "boolean",
+      "type": "Boolean",
       "customSerializer": "LenientBooleanSerializer",
       "customDeserializer": "LenientBooleanDeserializer"
     }

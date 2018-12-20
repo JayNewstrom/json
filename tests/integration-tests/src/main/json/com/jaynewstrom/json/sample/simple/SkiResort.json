@@ -1,7 +1,7 @@
 {
   "fields": [
     {"name": "name", "type": "String"},
-    {"name": "population", "type": "long"},
-    {"name": "averageSnowfallInInches", "jsonName": "averageSnowfall", "type": "int"}
+    {"name": "population", "type": "Long"},
+    {"name": "averageSnowfallInInches", "jsonName": "averageSnowfall", "type": "Int"}
   ]
 }
