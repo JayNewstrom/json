@@ -58,14 +58,14 @@ internal data class ModelSerializerBuilder(
     }
 
     private fun FieldDefinition.serialize(methodBuilder: FunSpec.Builder) {
-        if (customSerializer == null && primitiveType != null) {
-            methodBuilder.addStatement("$JSON_GENERATOR_VARIABLE_NAME.${primitiveType.serializeMethod}($MODEL_VARIABLE_NAME.$fieldName${primitiveType.conversionForSerializeMethod})")
-        } else if (type is ParameterizedTypeName && type.rawType == List::class.asTypeName()) {
+        if (type is ParameterizedTypeName && type.rawType == List::class.asTypeName()) {
             val modelType = type.typeArguments[0]
             val listSerializerType = ListSerializer::class.asTypeName()
             val serializer = getSerializer(modelType)
             val codeFormat = "%T(${serializer.code}).${callSerialize()}"
             methodBuilder.addStatement(codeFormat, listSerializerType, serializer.codeArgument)
+        } else if (customSerializer == null && primitiveType != null) {
+            methodBuilder.addStatement("$JSON_GENERATOR_VARIABLE_NAME.${primitiveType.serializeMethod}($MODEL_VARIABLE_NAME.$fieldName${primitiveType.conversionForSerializeMethod})")
         } else {
             val serializer = getSerializer(type)
             methodBuilder.addStatement("${serializer.code}.${callSerialize()}", serializer.codeArgument)

@@ -90,14 +90,14 @@ internal data class ModelDeserializerBuilder(
     }
 
     private fun FieldDefinition.assignVariable(methodBuilder: FunSpec.Builder) {
-        if (customDeserializer == null && primitiveType != null) {
-            methodBuilder.addStatement("$fieldName = $JSON_PARSER_VARIABLE_NAME.${primitiveType.parseMethod}()")
-        } else if (type is ParameterizedTypeName && type.rawType == List::class.asTypeName()) {
+        if (type is ParameterizedTypeName && type.rawType == List::class.asTypeName()) {
             val modelType = type.typeArguments[0]
             val listDeserializerType = ListDeserializer::class.java.asTypeName()
             val deserializer = getDeserializer(modelType)
             val codeFormat = "$fieldName = %T(${deserializer.code}).${callDeserialize()}"
             methodBuilder.addStatement(codeFormat, listDeserializerType, deserializer.codeArgument)
+        } else if (customDeserializer == null && primitiveType != null) {
+            methodBuilder.addStatement("$fieldName = $JSON_PARSER_VARIABLE_NAME.${primitiveType.parseMethod}()")
         } else {
             val deserializer = getDeserializer(type)
             methodBuilder.addStatement("$fieldName = ${deserializer.code}.${callDeserialize()}", deserializer.codeArgument)
