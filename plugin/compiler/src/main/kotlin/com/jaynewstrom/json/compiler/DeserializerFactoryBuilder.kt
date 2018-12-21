@@ -3,7 +3,6 @@ package com.jaynewstrom.json.compiler
 import com.jaynewstrom.composite.runtime.LibraryModule
 import com.jaynewstrom.json.runtime.JsonDeserializerFactory
 import com.squareup.kotlinpoet.AnnotationSpec
-import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeSpec
@@ -13,7 +12,8 @@ data class DeserializerFactoryBuilder(private val deserializers: Collection<Type
         return TypeSpec.classBuilder("RealJsonDeserializerFactory")
             .addAnnotation(libraryModuleAnnotation())
             .superclass(JsonDeserializerFactory::class)
-            .addFunction(createConstructor()) // TODO: This should be primary constructor, write kotlinpoet bug/fix.
+            .primaryConstructor(createConstructor())
+            .addSuperclassConstructorParameter("%L", deserializers.size)
             .build()
     }
 
@@ -25,7 +25,6 @@ data class DeserializerFactoryBuilder(private val deserializers: Collection<Type
 
     private fun createConstructor(): FunSpec {
         val constructorBuilder = FunSpec.constructorBuilder()
-        constructorBuilder.callSuperConstructor(CodeBlock.of("%L", deserializers.size))
         deserializers.forEach {
             val codeFormat = "register(%T)"
             constructorBuilder.addStatement(codeFormat, it)
