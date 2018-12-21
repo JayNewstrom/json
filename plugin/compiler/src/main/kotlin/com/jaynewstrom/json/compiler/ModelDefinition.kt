@@ -1,7 +1,8 @@
 package com.jaynewstrom.json.compiler
 
+import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
-import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.TypeName
 import java.io.File
 
 data class ModelDefinition internal constructor(
@@ -12,17 +13,19 @@ data class ModelDefinition internal constructor(
     val createSerializer: Boolean,
     val createDeserializer: Boolean
 ) {
-    val serializerTypeSpec: TypeSpec by lazy(LazyThreadSafetyMode.NONE) { ModelSerializerBuilder(name, fields).build() }
-    val deserializerTypeSpec: TypeSpec by lazy(LazyThreadSafetyMode.NONE) { ModelDeserializerBuilder(name, fields).build() }
+    val serializerTypeName: TypeName
+        get() = ClassName(packageName, JsonCompiler.serializerName(name))
+    val deserializerTypeName: TypeName
+        get() = ClassName(packageName, JsonCompiler.deserializerName(name))
 
     fun createModels(outputDirectory: File) {
         val typeBuilder = FileSpec.builder(packageName, name)
         typeBuilder.addType(ModelBuilder(isPublic, name, fields).build())
         if (createSerializer) {
-            typeBuilder.addType(serializerTypeSpec)
+            typeBuilder.addType(ModelSerializerBuilder(name, fields).build())
         }
         if (createDeserializer) {
-            typeBuilder.addType(deserializerTypeSpec)
+            typeBuilder.addType(ModelDeserializerBuilder(name, fields).build())
         }
         typeBuilder.build().writeTo(outputDirectory)
     }

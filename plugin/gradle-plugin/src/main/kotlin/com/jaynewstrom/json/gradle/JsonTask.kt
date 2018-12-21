@@ -7,7 +7,7 @@ import com.jaynewstrom.json.compiler.SerializerFactoryBuilder
 import com.jaynewstrom.json.compiler.VERSION
 import com.jaynewstrom.json.compiler.relativePath
 import com.squareup.kotlinpoet.FileSpec
-import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.TypeName
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
@@ -35,16 +35,16 @@ open class JsonTask : SourceTask() {
 
     @TaskAction fun execute(inputs: IncrementalTaskInputs) {
         val fileModelDefinitionMap = linkedMapOf<File, ModelDefinition>()
-        val deserializers = arrayListOf<TypeSpec>()
-        val serializers = arrayListOf<TypeSpec>()
+        val deserializers = arrayListOf<TypeName>()
+        val serializers = arrayListOf<TypeName>()
         getInputs().files.forEach { file ->
             val modelDefinition = modelDefinition(file)
             fileModelDefinitionMap[file] = modelDefinition
             if (modelDefinition.createSerializer) {
-                serializers.add(modelDefinition.serializerTypeSpec)
+                serializers.add(modelDefinition.serializerTypeName)
             }
             if (modelDefinition.createDeserializer) {
-                deserializers.add(modelDefinition.deserializerTypeSpec)
+                deserializers.add(modelDefinition.deserializerTypeName)
             }
         }
         inputs.outOfDate { inputFileDetails ->
