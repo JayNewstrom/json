@@ -15,8 +15,7 @@ internal data class ModelBuilder(
         val classBuilder = TypeSpec.classBuilder(name)
         classBuilder.addModifiers(KModifier.DATA)
         if (!isPublic) {
-            // TODO: revert once we switch to using reflection.
-//            classBuilder.addModifiers(KModifier.INTERNAL)
+            classBuilder.addModifiers(KModifier.INTERNAL)
         }
         val constructor = FunSpec.constructorBuilder().addModifiers(KModifier.INTERNAL)
         fields.forEach { field ->

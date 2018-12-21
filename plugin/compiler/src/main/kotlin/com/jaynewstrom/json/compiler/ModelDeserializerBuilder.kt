@@ -17,17 +17,21 @@ import com.squareup.kotlinpoet.asTypeName
 import java.io.IOException
 
 internal data class ModelDeserializerBuilder(
+    private val isPublic: Boolean,
     private val name: String,
     private val fields: List<FieldDefinition>
 ) {
     fun build(): TypeSpec {
         val jsonDeserializerType = JsonDeserializer::class.asTypeName()
-        return TypeSpec.objectBuilder(JsonCompiler.deserializerName(name))
+        val typeBuilder = TypeSpec.objectBuilder(JsonCompiler.deserializerName(name))
             .addSuperinterface(jsonDeserializerType.parameterizedBy(JsonCompiler.jsonModelType(name)))
             .addSuperinterface(JsonRegistrable::class)
             .addFunction(JsonCompiler.modelClassFunSpec(name))
             .addFunction(deserializeMethodSpec())
-            .build()
+        if (!isPublic) {
+            typeBuilder.addModifiers(KModifier.INTERNAL)
+        }
+        return typeBuilder.build()
     }
 
     private fun deserializeMethodSpec(): FunSpec {

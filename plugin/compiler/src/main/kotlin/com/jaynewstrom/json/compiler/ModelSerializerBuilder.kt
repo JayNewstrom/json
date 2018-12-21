@@ -15,17 +15,21 @@ import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
 
 internal data class ModelSerializerBuilder(
+    private val isPublic: Boolean,
     private val name: String,
     private val fields: List<FieldDefinition>
 ) {
     fun build(): TypeSpec {
         val jsonFactoryType = JsonSerializer::class.asTypeName()
-        return TypeSpec.objectBuilder(JsonCompiler.serializerName(name))
+        val typeBuilder = TypeSpec.objectBuilder(JsonCompiler.serializerName(name))
             .addSuperinterface(jsonFactoryType.parameterizedBy(JsonCompiler.jsonModelType(name)))
             .addSuperinterface(JsonRegistrable::class.java)
             .addFunction(JsonCompiler.modelClassFunSpec(name))
             .addFunction(serializeFunSpec())
-            .build()
+        if (!isPublic) {
+            typeBuilder.addModifiers(KModifier.INTERNAL)
+        }
+        return typeBuilder.build()
     }
 
     private fun serializeFunSpec(): FunSpec {
