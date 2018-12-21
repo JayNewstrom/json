@@ -1,5 +1,6 @@
 package com.jaynewstrom.json.compiler
 
+import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.PropertySpec
@@ -19,7 +20,12 @@ internal data class ModelBuilder(
         }
         val constructor = FunSpec.constructorBuilder().addModifiers(KModifier.INTERNAL)
         fields.forEach { field ->
-            classBuilder.addProperty(PropertySpec.builder(field.fieldName, field.type).initializer(field.fieldName).build())
+            classBuilder.addProperty(
+                PropertySpec.builder(field.fieldName, field.type)
+                    .initializer(field.fieldName)
+                    .addAnnotation(AnnotationSpec.builder(JvmField::class).build())
+                    .build()
+            )
             constructor.addParameter(field.fieldName, field.type)
         }
         classBuilder.primaryConstructor(constructor.build())
