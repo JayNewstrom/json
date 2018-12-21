@@ -70,7 +70,17 @@ open class JsonTask : SourceTask() {
     private fun File.relativePackage() = absolutePath.relativePath(File.separatorChar).dropLast(1).joinToString(".")
 
     private fun modelDefinition(file: File): ModelDefinition {
-        return JsonModelDefinitionParser(file, createSerializerByDefault, createDeserializerByDefault, file.relativePackage()).parse()
+        try {
+            return JsonModelDefinitionParser(
+                file,
+                createSerializerByDefault,
+                createDeserializerByDefault,
+                file.relativePackage()
+            ).parse()
+        } catch (e: Exception) {
+            logger.error("Error parsing $file")
+            throw e
+        }
     }
 
     private fun createModelSpecificClasses(modelDefinition: ModelDefinition) {

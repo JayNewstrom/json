@@ -31,9 +31,13 @@ open class JsonDeserializerFactory(val initialMapSize: Int) {
         return Math.ceil(initialMapSize / 0.75).toInt() + 15
     }
 
-    operator fun <T> get(modelClass: Class<T>): JsonDeserializer<T>? {
+    fun hasDeserializerFor(modelClass: Class<*>): Boolean {
+        return deserializerMap.contains(modelClass)
+    }
+
+    operator fun <T> get(modelClass: Class<T>): JsonDeserializer<T> {
         @Suppress("UNCHECKED_CAST") // We protect this by how we register.
-        return deserializerMap[modelClass] as JsonDeserializer<T>?
+        return deserializerMap[modelClass]!! as JsonDeserializer<T>
     }
 
     fun <T> register(jsonDeserializer: T) where T : JsonDeserializer<*>, T : JsonRegistrable {

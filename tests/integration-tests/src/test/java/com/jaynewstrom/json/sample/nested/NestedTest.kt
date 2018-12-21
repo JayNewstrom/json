@@ -12,4 +12,12 @@ class NestedTest {
         val json = JsonTestHelper().serialize(outer, Outer::class.java)
         assertThat(json).isEqualTo("{\"one\":\"a\",\"two\":{\"foo\":\"b\"}}")
     }
+
+    @Test fun testOptionalInner() {
+        val outer = JsonTestHelper().deserializeFile(OuterWithOptionalInner::class.java, "NestedOptionalTest.json", this)
+        assertThat(outer.one).isEqualTo("a")
+        assertThat(outer.two).isNull()
+        val json = JsonTestHelper().serialize(outer, OuterWithOptionalInner::class.java)
+        assertThat(json).isEqualTo("{\"one\":\"a\",\"two\":null}")
+    }
 }

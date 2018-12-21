@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonFactory
 import com.jaynewstrom.json.retrofit.JsonConverterFactory
 import com.jaynewstrom.json.sample.RealJsonDeserializerFactory
 import com.jaynewstrom.json.sample.RealJsonSerializerFactory
+import okhttp3.ResponseBody
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.fest.assertions.api.Assertions.assertThat
@@ -16,6 +17,7 @@ import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.http.Body
 import retrofit2.http.POST
+import java.lang.reflect.Type
 
 class JsonConverterFactoryTest {
     @get:Rule val mockWebServer = MockWebServer()
@@ -23,6 +25,8 @@ class JsonConverterFactoryTest {
     private lateinit var retrofit: Retrofit
 
     private interface Service {
+        @POST("test") fun callFallThrough(): Call<Another>
+
         @POST("test") fun callBasicResponseNotSupported(): Call<Unknown>
 
         @POST("test") fun callBasicRequestNotSupported(@Body notSupported: Unknown): Call<Void>
@@ -42,11 +46,29 @@ class JsonConverterFactoryTest {
 
     private class Unknown
 
+    private object Another
+
+    private object AnotherConverterFactory : Converter.Factory() {
+        override fun responseBodyConverter(type: Type, annotations: Array<Annotation>, retrofit: Retrofit): Converter<ResponseBody, *>? {
+            if (type == Another::class.java) {
+                return AnotherConverter
+            }
+            return super.responseBodyConverter(type, annotations, retrofit)
+        }
+    }
+
+    private object AnotherConverter : Converter<ResponseBody, Another> {
+        override fun convert(value: ResponseBody): Another {
+            return Another
+        }
+    }
+
     @Before
     fun setUp() {
         retrofit = Retrofit.Builder()
             .baseUrl(mockWebServer.url("/"))
             .addConverterFactory(converterFactory())
+            .addConverterFactory(AnotherConverterFactory)
             .build()
     }
 
@@ -56,6 +78,13 @@ class JsonConverterFactoryTest {
 
     private fun converterFactory(): Converter.Factory {
         return JsonConverterFactory.create(JsonFactory(), RealJsonSerializerFactory(), RealJsonDeserializerFactory())
+    }
+
+    @Test
+    fun testConverterFactoryFallsBackIfAnotherConverterHandlesTheType() {
+        mockWebServer.enqueue(MockResponse().setBody("Found"))
+        val response = service().callFallThrough().execute()
+        assertThat(response.body()!!).isEqualTo(Another)
     }
 
     @Test

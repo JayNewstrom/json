@@ -123,7 +123,7 @@ internal data class ModelDeserializerBuilder(
 
     private fun FieldDefinition.getDeserializer(typeName: TypeName): FieldDeserializerResult {
         return if (customDeserializer == null) {
-            FieldDeserializerResult("$DESERIALIZER_FACTORY_VARIABLE_NAME[%T::class.java]!!", typeName)
+            FieldDeserializerResult("$DESERIALIZER_FACTORY_VARIABLE_NAME[%T::class.java]", typeName.copy(nullable = false))
         } else {
             FieldDeserializerResult("%T", customDeserializer)
         }

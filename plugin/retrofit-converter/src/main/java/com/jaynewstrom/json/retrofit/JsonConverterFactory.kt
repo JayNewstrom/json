@@ -50,9 +50,8 @@ class JsonConverterFactory private constructor(
             }
         }
         if (type is Class<*>) {
-            val deserializer = deserializerFactory.get(type)
-            if (deserializer != null) {
-                return deserializer
+            if (deserializerFactory.hasDeserializerFor(type)) {
+                return deserializerFactory[type]
             }
         }
         return null
@@ -84,9 +83,8 @@ class JsonConverterFactory private constructor(
             }
         }
         if (type is Class<*>) {
-            val serializer = serializerFactory.get(type)
-            if (serializer != null) {
-                return serializer
+            if (serializerFactory.hasSerializerFor(type)) {
+                return serializerFactory[type]
             }
         }
         return null

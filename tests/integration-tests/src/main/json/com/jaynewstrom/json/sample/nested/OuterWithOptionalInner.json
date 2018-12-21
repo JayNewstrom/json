@@ -1,0 +1,6 @@
+{
+  "fields": [
+    {"name": "one", "type": "String"},
+    {"name": "two", "type": "Inner", "nullable": true}
+  ]
+}

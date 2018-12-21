@@ -80,7 +80,7 @@ internal data class ModelSerializerBuilder(
 
     private fun FieldDefinition.getSerializer(typeName: TypeName): FieldSerializerResult {
         return if (customSerializer == null) {
-            FieldSerializerResult("$SERIALIZER_FACTORY_VARIABLE_NAME[%T::class.java]!!", typeName)
+            FieldSerializerResult("$SERIALIZER_FACTORY_VARIABLE_NAME[%T::class.java]", typeName.copy(nullable = false))
         } else {
             FieldSerializerResult("%T", customSerializer)
         }

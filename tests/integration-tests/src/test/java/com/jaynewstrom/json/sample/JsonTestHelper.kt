@@ -31,7 +31,7 @@ class JsonTestHelper {
         try {
             jsonParser.nextToken()
             val deserializer = deserializerFactory[modelClass]
-            return deserializer!!.deserialize(jsonParser, deserializerFactory)
+            return deserializer.deserialize(jsonParser, deserializerFactory)
         } catch (e: IOException) {
             throw AssertionError(e)
         }
@@ -42,7 +42,7 @@ class JsonTestHelper {
             val sw = StringWriter()
             val generator = jsonFactory.createGenerator(sw)
             val serializer = serializerFactory[modelClass]
-            serializer!!.serialize(model, generator, serializerFactory)
+            serializer.serialize(model, generator, serializerFactory)
             generator.close()
             return sw.toString()
         } catch (e: IOException) {
