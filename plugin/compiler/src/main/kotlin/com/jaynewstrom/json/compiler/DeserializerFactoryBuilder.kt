@@ -17,7 +17,7 @@ data class DeserializerFactoryBuilder(private val deserializers: Collection<Type
 
     private fun libraryModuleAnnotation(): AnnotationSpec {
         return AnnotationSpec.builder(LibraryModule::class.java)
-            .addMember("value", "%T.class", JsonDeserializerFactory::class.java)
+            .addMember("%T::class", JsonDeserializerFactory::class.java)
             .build()
     }
 
@@ -26,7 +26,7 @@ data class DeserializerFactoryBuilder(private val deserializers: Collection<Type
         constructorBuilder.addStatement("super(%L)", deserializers.size)
         deserializers.forEach {
             val codeFormat = "register(%T)"
-            constructorBuilder.addStatement(codeFormat, it)
+//            constructorBuilder.addStatement(codeFormat, it) // TODO: This doesn't work.
         }
         return constructorBuilder.build()
     }

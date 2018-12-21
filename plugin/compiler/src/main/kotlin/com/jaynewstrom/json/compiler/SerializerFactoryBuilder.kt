@@ -19,7 +19,7 @@ data class SerializerFactoryBuilder(
 
     private fun libraryModuleAnnotation(): AnnotationSpec {
         return AnnotationSpec.builder(LibraryModule::class.java)
-            .addMember("value", "%T.class", JsonSerializerFactory::class.java)
+            .addMember("%T::class", JsonSerializerFactory::class.java)
             .build()
     }
 
@@ -28,7 +28,7 @@ data class SerializerFactoryBuilder(
         constructorBuilder.addStatement("super(%L)", serializers.size)
         serializers.forEach {
             val codeFormat = "register(%T)"
-            constructorBuilder.addStatement(codeFormat, it)
+//            constructorBuilder.addStatement(codeFormat, it) // TODO: This doesn't work!
         }
         return constructorBuilder.build()
     }

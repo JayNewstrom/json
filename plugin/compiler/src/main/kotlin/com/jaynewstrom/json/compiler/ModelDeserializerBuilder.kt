@@ -96,7 +96,7 @@ internal data class ModelDeserializerBuilder(
             val modelType = type.typeArguments[0]
             val listDeserializerType = ListDeserializer::class.java.asTypeName()
             val deserializer = getDeserializer(modelType)
-            val codeFormat = "$fieldName = %T<>(${deserializer.code}).${callDeserialize()}"
+            val codeFormat = "$fieldName = %T(${deserializer.code}).${callDeserialize()}"
             methodBuilder.addStatement(codeFormat, listDeserializerType, deserializer.codeArgument)
         } else {
             val deserializer = getDeserializer(type)
@@ -119,7 +119,7 @@ internal data class ModelDeserializerBuilder(
 
     private fun FieldDefinition.getDeserializer(typeName: TypeName): FieldDeserializerResult {
         return if (customDeserializer == null) {
-            FieldDeserializerResult("$DESERIALIZER_FACTORY_VARIABLE_NAME.get(%T.class)", typeName)
+            FieldDeserializerResult("$DESERIALIZER_FACTORY_VARIABLE_NAME[%T::class.java]!!", typeName)
         } else {
             FieldDeserializerResult("%T", customDeserializer)
         }

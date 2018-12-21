@@ -64,7 +64,7 @@ internal data class ModelSerializerBuilder(
             val modelType = type.typeArguments[0]
             val listSerializerType = ListSerializer::class.asTypeName()
             val serializer = getSerializer(modelType)
-            val codeFormat = "new %T<>(${serializer.code}).${callSerialize()}"
+            val codeFormat = "%T(${serializer.code}).${callSerialize()}"
             methodBuilder.addStatement(codeFormat, listSerializerType, serializer.codeArgument)
         } else {
             val serializer = getSerializer(type)
@@ -76,7 +76,7 @@ internal data class ModelSerializerBuilder(
 
     private fun FieldDefinition.getSerializer(typeName: TypeName): FieldSerializerResult {
         return if (customSerializer == null) {
-            FieldSerializerResult("$SERIALIZER_FACTORY_VARIABLE_NAME.get(%T::class.java)", typeName)
+            FieldSerializerResult("$SERIALIZER_FACTORY_VARIABLE_NAME[%T::class.java]!!", typeName)
         } else {
             FieldSerializerResult("%T", customSerializer)
         }
