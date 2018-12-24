@@ -1,5 +1,7 @@
 package com.jaynewstrom.json.compiler
 
+import com.jaynewstrom.json.runtime.HavingJsonDeserializer
+import com.jaynewstrom.json.runtime.HavingJsonSerializer
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
@@ -7,18 +9,28 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 
 internal data class ModelBuilder(
-    private val isPublic: Boolean,
-    private val name: String,
-    private val fields: List<FieldDefinition>
+    private val modelDefinition: ModelDefinition
 ) {
     fun build(): TypeSpec {
-        val classBuilder = TypeSpec.classBuilder(name)
+        val classBuilder = TypeSpec.classBuilder(modelDefinition.name)
         classBuilder.addModifiers(KModifier.DATA)
-        if (!isPublic) {
+        if (!modelDefinition.isPublic) {
             classBuilder.addModifiers(KModifier.INTERNAL)
         }
+        if (modelDefinition.createSerializer) {
+            classBuilder.addAnnotation(AnnotationSpec.builder(HavingJsonSerializer::class)
+                .addMember("%T::class", modelDefinition.serializerTypeName)
+                .build()
+            )
+        }
+        if (modelDefinition.createDeserializer) {
+            classBuilder.addAnnotation(AnnotationSpec.builder(HavingJsonDeserializer::class)
+                .addMember("%T::class", modelDefinition.deserializerTypeName)
+                .build()
+            )
+        }
         val constructor = FunSpec.constructorBuilder().addModifiers(KModifier.INTERNAL)
-        fields.forEach { field ->
+        modelDefinition.fields.forEach { field ->
             classBuilder.addProperty(
                 PropertySpec.builder(field.fieldName, field.type)
                     .initializer(field.fieldName)
