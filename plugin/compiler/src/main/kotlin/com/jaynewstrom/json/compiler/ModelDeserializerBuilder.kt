@@ -23,7 +23,7 @@ internal data class ModelDeserializerBuilder(
 ) {
     fun build(): TypeSpec {
         val jsonDeserializerType = JsonDeserializer::class.asTypeName()
-        val typeBuilder = TypeSpec.objectBuilder(JsonCompiler.deserializerName(name))
+        val typeBuilder = TypeSpec.classBuilder(JsonCompiler.deserializerName(name))
             .addSuperinterface(jsonDeserializerType.parameterizedBy(JsonCompiler.jsonModelType(name)))
             .addSuperinterface(JsonRegistrable::class)
             .addFunction(JsonCompiler.modelClassFunSpec(name))

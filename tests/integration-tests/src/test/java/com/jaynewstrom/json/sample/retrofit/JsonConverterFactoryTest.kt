@@ -2,8 +2,8 @@ package com.jaynewstrom.json.sample.retrofit
 
 import com.fasterxml.jackson.core.JsonFactory
 import com.jaynewstrom.json.retrofit.JsonConverterFactory
-import com.jaynewstrom.json.sample.RealJsonDeserializerFactory
-import com.jaynewstrom.json.sample.RealJsonSerializerFactory
+import com.jaynewstrom.json.runtime.JsonDeserializerFactory
+import com.jaynewstrom.json.runtime.JsonSerializerFactory
 import okhttp3.ResponseBody
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -77,7 +77,7 @@ class JsonConverterFactoryTest {
     }
 
     private fun converterFactory(): Converter.Factory {
-        return JsonConverterFactory.create(JsonFactory(), RealJsonSerializerFactory(), RealJsonDeserializerFactory())
+        return JsonConverterFactory.create(JsonFactory(), JsonSerializerFactory(), JsonDeserializerFactory())
     }
 
     @Test

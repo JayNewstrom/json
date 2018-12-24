@@ -5,7 +5,6 @@ import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.api.BaseVariant
-import com.jaynewstrom.json.compiler.COMPOSITE_VERSION
 import com.jaynewstrom.json.compiler.VERSION
 import org.gradle.api.DomainObjectSet
 import org.gradle.api.Plugin
@@ -33,12 +32,9 @@ class JsonPlugin : Plugin<Project> {
         val generateJsonModel = project.task("generateJsonModel")
 
         val compileDeps = project.dependencySetForName("implementation") ?: project.dependencySetForName("compile")
-        val annotationProcessorDeps = project.dependencySetForName("kapt") ?: project.dependencySetForName("annotationProcessor")
         project.gradle.addListener(object : DependencyResolutionListener {
             override fun beforeResolve(dependencies: ResolvableDependencies?) {
                 compileDeps?.add(project.dependencies.create("com.jaynewstrom.json:runtime:$VERSION"))
-                compileDeps?.add(project.dependencies.create("com.jaynewstrom.composite:runtime:$COMPOSITE_VERSION"))
-                annotationProcessorDeps?.add(project.dependencies.create("com.jaynewstrom.composite:compiler:$COMPOSITE_VERSION"))
                 project.gradle.removeListener(this)
             }
 
@@ -50,7 +46,6 @@ class JsonPlugin : Plugin<Project> {
             val taskName = "generate${variant.name.capitalize()}JsonModel"
             val task = project.tasks.create(taskName, JsonTask::class.java) { jsonTask ->
                 val extension = project.extensions.getByType(JsonExtension::class.java)
-                jsonTask.defaultPackage = variant.generateBuildConfig.buildConfigPackageName
                 jsonTask.createSerializerByDefault = extension.createSerializerByDefault
                 jsonTask.createDeserializerByDefault = extension.createDeserializerByDefault
             }
@@ -67,10 +62,10 @@ class JsonPlugin : Plugin<Project> {
     }
 
     private fun Project.dependencySetForName(name: String): DependencySet? {
-        try {
-            return configurations.getByName(name).dependencies
+        return try {
+            configurations.getByName(name).dependencies
         } catch (e: UnknownConfigurationException) {
-            return null
+            null
         }
     }
 }

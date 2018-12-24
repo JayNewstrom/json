@@ -9,7 +9,6 @@ dependencies {
     compile dep.kotlinStdLib
     compile dep.jacksonDatabind
     compile project(':runtime')
-    compile dep.compositeRuntime
 }
 
 task pluginVersion {
@@ -24,8 +23,7 @@ task pluginVersion {
         versionFile.text = """// Generated file. Do not edit!
 package com.jaynewstrom.json.compiler
 
-val VERSION = "${project.version}"
-val COMPOSITE_VERSION = "${compositeVersion}"
+const val VERSION = "${project.version}"
 """
     }
 }

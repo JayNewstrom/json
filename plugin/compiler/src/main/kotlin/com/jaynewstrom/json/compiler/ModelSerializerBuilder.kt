@@ -21,7 +21,7 @@ internal data class ModelSerializerBuilder(
 ) {
     fun build(): TypeSpec {
         val jsonFactoryType = JsonSerializer::class.asTypeName()
-        val typeBuilder = TypeSpec.objectBuilder(JsonCompiler.serializerName(name))
+        val typeBuilder = TypeSpec.classBuilder(JsonCompiler.serializerName(name))
             .addSuperinterface(jsonFactoryType.parameterizedBy(JsonCompiler.jsonModelType(name)))
             .addSuperinterface(JsonRegistrable::class.java)
             .addFunction(JsonCompiler.modelClassFunSpec(name))

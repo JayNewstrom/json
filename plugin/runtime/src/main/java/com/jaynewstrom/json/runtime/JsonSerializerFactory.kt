@@ -11,11 +11,11 @@ import com.jaynewstrom.json.runtime.internal.StringJsonAdapter
 
 import java.util.LinkedHashMap
 
-open class JsonSerializerFactory(val initialMapSize: Int) {
+class JsonSerializerFactory {
     private val serializerMap: MutableMap<Class<*>, JsonSerializer<*>>
 
     init {
-        serializerMap = LinkedHashMap(initialMapCapacity(initialMapSize))
+        serializerMap = LinkedHashMap(100)
         register(BooleanJsonAdapter)
         register(ByteJsonAdapter)
         register(DoubleJsonAdapter)
@@ -26,25 +26,33 @@ open class JsonSerializerFactory(val initialMapSize: Int) {
         register(StringJsonAdapter)
     }
 
-    // Size the map so that it won't grow when initializing, with a little room for user registered serializers.
-    private fun initialMapCapacity(initialMapSize: Int): Int {
-        return Math.ceil(initialMapSize / 0.75).toInt() + 15
-    }
-
     fun hasSerializerFor(modelClass: Class<*>): Boolean {
-        return serializerMap.contains(modelClass)
+        if (serializerMap.contains(modelClass)) {
+            return true
+        }
+        val serializer = putSerializerIntoMapForTypeIfExists(modelClass)
+        return serializer != null
     }
 
     operator fun <T> get(modelClass: Class<T>): JsonSerializer<T> {
+        var serializer = serializerMap[modelClass]
+        if (serializer == null) {
+            serializer = putSerializerIntoMapForTypeIfExists(modelClass)
+        }
         @Suppress("UNCHECKED_CAST") // We protect this by how we register.
-        return serializerMap[modelClass]!! as JsonSerializer<T>
+        return serializer!! as JsonSerializer<T>
     }
 
     fun <T> register(jsonSerializer: T) where T : JsonSerializer<*>, T : JsonRegistrable {
         serializerMap[jsonSerializer.modelClass()] = jsonSerializer
     }
 
-    fun registerAll(serializerFactory: JsonSerializerFactory) {
-        serializerMap.putAll(serializerFactory.serializerMap)
+    private fun putSerializerIntoMapForTypeIfExists(modelClass: Class<*>): JsonSerializer<*>? {
+        val annotation = modelClass.declaredAnnotations.firstOrNull { it is HavingJsonSerializer }
+        val serializer = (annotation as? HavingJsonSerializer)?.value?.java?.newInstance()
+        if (serializer != null) {
+            serializerMap[modelClass] = serializer
+        }
+        return serializer
     }
 }

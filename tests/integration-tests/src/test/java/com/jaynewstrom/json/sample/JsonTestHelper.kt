@@ -2,13 +2,15 @@ package com.jaynewstrom.json.sample
 
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonParser
+import com.jaynewstrom.json.runtime.JsonDeserializerFactory
+import com.jaynewstrom.json.runtime.JsonSerializerFactory
 import java.io.IOException
 import java.io.StringWriter
 
 class JsonTestHelper {
     private val jsonFactory = JsonFactory()
-    private val deserializerFactory = RealJsonDeserializerFactory()
-    private val serializerFactory = RealJsonSerializerFactory()
+    private val deserializerFactory = JsonDeserializerFactory()
+    private val serializerFactory = JsonSerializerFactory()
 
     fun <T> deserializeFile(modelClass: Class<T>, fileName: String, testObject: Any): T {
         try {

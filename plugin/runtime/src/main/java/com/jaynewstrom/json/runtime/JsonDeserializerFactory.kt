@@ -11,11 +11,11 @@ import com.jaynewstrom.json.runtime.internal.StringJsonAdapter
 
 import java.util.LinkedHashMap
 
-open class JsonDeserializerFactory(val initialMapSize: Int) {
+class JsonDeserializerFactory {
     private val deserializerMap: MutableMap<Class<*>, JsonDeserializer<*>>
 
     init {
-        deserializerMap = LinkedHashMap(initialMapCapacity(initialMapSize))
+        deserializerMap = LinkedHashMap(100)
         register(BooleanJsonAdapter)
         register(ByteJsonAdapter)
         register(DoubleJsonAdapter)
@@ -26,25 +26,33 @@ open class JsonDeserializerFactory(val initialMapSize: Int) {
         register(StringJsonAdapter)
     }
 
-    // Size the map so that it won't grow when initializing, with a little room for user registered deserializers.
-    private fun initialMapCapacity(initialMapSize: Int): Int {
-        return Math.ceil(initialMapSize / 0.75).toInt() + 15
-    }
-
     fun hasDeserializerFor(modelClass: Class<*>): Boolean {
-        return deserializerMap.contains(modelClass)
+        if (deserializerMap.contains(modelClass)) {
+            return true
+        }
+        val deserializer = putDeserializerIntoMapForTypeIfExists(modelClass)
+        return deserializer != null
     }
 
     operator fun <T> get(modelClass: Class<T>): JsonDeserializer<T> {
+        var deserializer = deserializerMap[modelClass]
+        if (deserializer == null) {
+            deserializer = putDeserializerIntoMapForTypeIfExists(modelClass)
+        }
         @Suppress("UNCHECKED_CAST") // We protect this by how we register.
-        return deserializerMap[modelClass]!! as JsonDeserializer<T>
+        return deserializer!! as JsonDeserializer<T>
     }
 
     fun <T> register(jsonDeserializer: T) where T : JsonDeserializer<*>, T : JsonRegistrable {
         deserializerMap[jsonDeserializer.modelClass()] = jsonDeserializer
     }
 
-    fun registerAll(deserializerFactory: JsonDeserializerFactory) {
-        deserializerMap.putAll(deserializerFactory.deserializerMap)
+    private fun putDeserializerIntoMapForTypeIfExists(modelClass: Class<*>): JsonDeserializer<*>? {
+        val annotation = modelClass.declaredAnnotations.firstOrNull { it is HavingJsonDeserializer }
+        val deserializer = (annotation as? HavingJsonDeserializer)?.value?.java?.newInstance()
+        if (deserializer != null) {
+            deserializerMap[modelClass] = deserializer
+        }
+        return deserializer
     }
 }
