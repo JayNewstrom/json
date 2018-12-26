@@ -6,7 +6,7 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.11"
         classpath dep.androidPlugin
-        classpath "com.jaynewstrom.json:gradle-plugin:$ARTIFACT_VERSION"
+        classpath "com.jaynewstrom.jsonDelight:gradle-plugin:$ARTIFACT_VERSION"
     }
 }
 
@@ -17,7 +17,7 @@ repositories {
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'com.jaynewstrom.json'
+apply plugin: 'com.jaynewstrom.jsonDelight'
 
 android {
     compileSdkVersion 28
@@ -26,17 +26,22 @@ android {
         minSdkVersion 15
         targetSdkVersion 28
     }
+
+    packagingOptions {
+        exclude 'META-INF/*.kotlin_module'
+        exclude 'META-INF/proguard/*'
+    }
 }
 
 dependencies {
-    api "com.jaynewstrom.json:retrofit-converter:$ARTIFACT_VERSION"
+    api "com.jaynewstrom.jsonDelight:retrofit-converter:$ARTIFACT_VERSION"
 
     testImplementation dep.junit
     testImplementation dep.fest
     testImplementation 'com.squareup.okhttp3:mockwebserver:3.12.0'
 }
 
-json {
+jsonDelight {
     createSerializerByDefault true
     createDeserializerByDefault true
 }

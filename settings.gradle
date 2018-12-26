@@ -1,4 +1,4 @@
-rootProject.name = 'json'
+rootProject.name = 'jsonDelight'
 
 includeBuild 'plugin'
 includeBuild 'tests'

@@ -18,10 +18,10 @@ task pluginVersion {
     outputs.dir outputDir
 
     doLast {
-        def versionFile = file("$outputDir/com/jaynewstrom/json/compiler/Version.kt")
+        def versionFile = file("$outputDir/com/jaynewstrom/jsonDelight/compiler/Version.kt")
         versionFile.parentFile.mkdirs()
         versionFile.text = """// Generated file. Do not edit!
-package com.jaynewstrom.json.compiler
+package com.jaynewstrom.jsonDelight.compiler
 
 const val VERSION = "${project.version}"
 """

@@ -27,17 +27,17 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.jaynewstrom.json:gradle-plugin:0.20.0'
+        classpath 'com.jaynewstrom.jsonDelight:gradle-plugin:0.20.0'
     }
 }
 
 apply plugin: 'com.android.application'
-apply plugin: 'com.jaynewstrom.json'
+apply plugin: 'com.jaynewstrom.jsonDelight'
 ```
 
 Usage
 -----
-Define your models in /src/main/json/{the package you want the model to live in}. The gradle task will create the models for you at build time.
+Define your models in /src/main/jsonDelight/{the package you want the model to live in}. The gradle task will create the models for you at build time.
 An example json file is below.
 ```json
 {
@@ -83,7 +83,7 @@ Add the retrofit dependency to your `build.gradle`.
 ```groovy
 dependencies {
     ...
-    compile 'com.jaynewstrom.json:retrofit-converter:0.20.0'
+    compile 'com.jaynewstrom.jsonDelight:retrofit-converter:0.20.0'
 }
 ```
 
