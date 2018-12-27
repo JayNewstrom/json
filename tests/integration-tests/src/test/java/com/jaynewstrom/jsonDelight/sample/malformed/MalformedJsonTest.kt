@@ -14,7 +14,7 @@ class MalformedJsonTest {
         } catch (e: AssertionError) {
             assertThat(e.cause).isExactlyInstanceOf(JsonEOFException::class.java)
                 .hasMessageContaining("Unexpected end-of-input: expected close marker for Object")
-            return  // Catching AssertionError, can't fail the try.
+            return // Catching AssertionError, can't fail the try.
         }
 
         fail()
@@ -26,7 +26,7 @@ class MalformedJsonTest {
         } catch (e: AssertionError) {
             assertThat(e.cause).isExactlyInstanceOf(JsonParseException::class.java)
                 .hasMessageContaining("Unexpected close marker '}': expected ']'")
-            return  // Catching AssertionError, can't fail the try.
+            return // Catching AssertionError, can't fail the try.
         }
 
         fail()
@@ -38,7 +38,7 @@ class MalformedJsonTest {
         } catch (e: AssertionError) {
             assertThat(e.cause).isExactlyInstanceOf(JsonParseException::class.java)
                 .hasMessageContaining("Unexpected character ('}' (code 125)): was expecting double-quote to start field name")
-            return  // Catching AssertionError, can't fail the try.
+            return // Catching AssertionError, can't fail the try.
         }
 
         fail()

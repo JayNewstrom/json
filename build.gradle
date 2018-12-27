@@ -9,3 +9,11 @@ task clean {
     dependsOn gradle.includedBuild('plugin').task(':retrofit-converter:clean')
     dependsOn gradle.includedBuild('plugin').task(':runtime:clean')
 }
+
+task check {
+    dependsOn gradle.includedBuild('tests').task(':integration-tests:check')
+    dependsOn gradle.includedBuild('plugin').task(':compiler:check')
+    dependsOn gradle.includedBuild('plugin').task(':gradle-plugin:check')
+    dependsOn gradle.includedBuild('plugin').task(':retrofit-converter:check')
+    dependsOn gradle.includedBuild('plugin').task(':runtime:check')
+}
