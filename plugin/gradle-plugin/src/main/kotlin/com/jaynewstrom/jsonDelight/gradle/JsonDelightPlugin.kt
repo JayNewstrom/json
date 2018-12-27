@@ -13,6 +13,7 @@ import org.gradle.api.artifacts.DependencyResolutionListener
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.ResolvableDependencies
 import org.gradle.api.artifacts.UnknownConfigurationException
+import java.io.File
 
 class JsonDelightPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -50,7 +51,7 @@ class JsonDelightPlugin : Plugin<Project> {
                 jsonTask.createDeserializerByDefault = extension.createDeserializerByDefault
             }
             task.group = "jsondelightmodel"
-            task.buildDirectory = project.buildDir
+            task.outputDirectory = listOf("generated", "source", "jsonDelight").fold(project.buildDir, ::File)
             task.description = "Generate Json Delight Models and Factories for ${variant.name}"
             task.source(variant.sourceSets.map { sourceSet -> "src/${sourceSet.name}/jsonDelight" })
             task.include("**/*.json")

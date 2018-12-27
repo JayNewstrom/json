@@ -4,8 +4,8 @@ ext {
     dep = [
             androidPlugin: 'com.android.tools.build:gradle:3.2.1',
             kotlinPoet: 'com.squareup:kotlinpoet:1.0.0',
-            kotlinStdLib: "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
-            kotlinReflect: "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
+            kotlinStdLibJdk7: "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion",
+            kotlinStdLibJdk8: "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion",
             kotlinGradlePlugin: "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion",
             retrofit: 'com.squareup.retrofit2:retrofit:2.5.0',
             jackson: 'com.fasterxml.jackson.core:jackson-core:2.9.8',

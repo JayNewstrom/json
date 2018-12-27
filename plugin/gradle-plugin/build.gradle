@@ -3,7 +3,7 @@ apply plugin: 'java-gradle-plugin'
 
 dependencies {
     compileOnly gradleApi()
-    compile dep.kotlinStdLib
+    compile dep.kotlinStdLibJdk8
     compile dep.androidPlugin
     compile project(':compiler')
 }

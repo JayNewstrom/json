@@ -4,9 +4,12 @@ import com.jaynewstrom.jsonDelight.compiler.JsonModelDefinitionParser
 import com.jaynewstrom.jsonDelight.compiler.ModelDefinition
 import com.jaynewstrom.jsonDelight.compiler.VERSION
 import com.jaynewstrom.jsonDelight.compiler.relativePath
+import org.gradle.api.file.FileTree
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SourceTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
@@ -25,11 +28,10 @@ open class JsonDelightTask : SourceTask() {
     @get:OutputDirectory
     lateinit var outputDirectory: File
 
-    var buildDirectory: File? = null
-        set(value) {
-            field = value
-            outputDirectory = listOf("generated", "source", "jsonDelight").fold(buildDirectory!!, ::File)
-        }
+    @PathSensitive(PathSensitivity.RELATIVE)
+    override fun getSource(): FileTree {
+        return super.getSource()
+    }
 
     @TaskAction fun execute(inputs: IncrementalTaskInputs) {
         if (!inputs.isIncremental) {
