@@ -38,9 +38,11 @@ open class JsonDelightTask : SourceTask() {
             outputDirectory.delete()
         }
         inputs.outOfDate { inputFileDetails ->
-            removeFilesAssociatedWithDefinition(inputFileDetails.file)
-            val modelDefinition = modelDefinition(inputFileDetails.file)
-            modelDefinition.createModels(outputDirectory)
+            if (!inputFileDetails.file.isDirectory) {
+                removeFilesAssociatedWithDefinition(inputFileDetails.file)
+                val modelDefinition = modelDefinition(inputFileDetails.file)
+                modelDefinition.createModels(outputDirectory)
+            }
         }
         inputs.removed { inputFileDetails ->
             removeFilesAssociatedWithDefinition(inputFileDetails.file)

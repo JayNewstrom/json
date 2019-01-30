@@ -1,8 +1,8 @@
 ext {
-    kotlinVersion = '1.3.11'
+    kotlinVersion = '1.3.20'
 
     dep = [
-            androidPlugin: 'com.android.tools.build:gradle:3.2.1',
+            androidPlugin: 'com.android.tools.build:gradle:3.3.0',
             kotlinPoet: 'com.squareup:kotlinpoet:1.0.0',
             kotlinStdLibJdk7: "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion",
             kotlinStdLibJdk8: "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion",

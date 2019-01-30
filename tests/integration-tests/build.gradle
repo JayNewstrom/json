@@ -4,7 +4,7 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.11"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.20"
         classpath dep.androidPlugin
         classpath "com.jaynewstrom.jsonDelight:gradle-plugin:$ARTIFACT_VERSION"
     }
