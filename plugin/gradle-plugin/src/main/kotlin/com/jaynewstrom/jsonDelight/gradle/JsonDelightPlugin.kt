@@ -51,7 +51,7 @@ class JsonDelightPlugin : Plugin<Project> {
                 jsonTask.createDeserializerByDefault = extension.createDeserializerByDefault
             }
             task.group = "jsondelightmodel"
-            task.outputDirectory = listOf("generated", "source", "jsonDelight").fold(project.buildDir, ::File)
+            task.outputDirectory = listOf("generated", "source", "jsonDelight", variant.name).fold(project.buildDir, ::File)
             task.description = "Generate Json Delight Models and Factories for ${variant.name}"
             task.source(variant.sourceSets.map { sourceSet -> "src/${sourceSet.name}/jsonDelight" })
             task.include("**/*.json")
