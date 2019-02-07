@@ -30,8 +30,6 @@ class JsonDelightPlugin : Plugin<Project> {
     private fun <T : BaseVariant> configureAndroid(project: Project, variants: DomainObjectSet<T>) {
         project.extensions.create("jsonDelight", JsonDelightExtension::class.java)
 
-        val generateJsonDelightModel = project.task("generateJsonDelightModel")
-
         val compileDeps = project.dependencySetForName("implementation") ?: project.dependencySetForName("compile")
         project.gradle.addListener(object : DependencyResolutionListener {
             override fun beforeResolve(dependencies: ResolvableDependencies?) {
@@ -45,20 +43,19 @@ class JsonDelightPlugin : Plugin<Project> {
 
         variants.all { variant ->
             val taskName = "generate${variant.name.capitalize()}JsonDelightModel"
-            val task = project.tasks.create(taskName, JsonDelightTask::class.java) { jsonTask ->
+            val taskProvider = project.tasks.register(taskName, JsonDelightTask::class.java) { task ->
                 val extension = project.extensions.getByType(JsonDelightExtension::class.java)
-                jsonTask.createSerializerByDefault = extension.createSerializerByDefault
-                jsonTask.createDeserializerByDefault = extension.createDeserializerByDefault
+                task.createSerializerByDefault = extension.createSerializerByDefault
+                task.createDeserializerByDefault = extension.createDeserializerByDefault
+                task.group = "jsondelightmodel"
+                task.outputDirectory = listOf("generated", "source", "jsonDelight", variant.name).fold(project.buildDir, ::File)
+                task.description = "Generate Json Delight Models and Factories for ${variant.name}"
+                task.source(variant.sourceSets.map { sourceSet -> "src/${sourceSet.name}/jsonDelight" })
+                task.include("**/*.json")
             }
-            task.group = "jsondelightmodel"
-            task.outputDirectory = listOf("generated", "source", "jsonDelight", variant.name).fold(project.buildDir, ::File)
-            task.description = "Generate Json Delight Models and Factories for ${variant.name}"
-            task.source(variant.sourceSets.map { sourceSet -> "src/${sourceSet.name}/jsonDelight" })
-            task.include("**/*.json")
 
-            generateJsonDelightModel.dependsOn(task)
-
-            variant.registerJavaGeneratingTask(task, task.outputDirectory)
+            // TODO: https://issuetracker.google.com/issues/117343589
+            variant.registerJavaGeneratingTask(taskProvider.get(), taskProvider.get().outputDirectory)
         }
     }
 
