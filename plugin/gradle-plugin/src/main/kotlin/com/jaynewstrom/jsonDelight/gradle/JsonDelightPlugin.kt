@@ -42,20 +42,21 @@ class JsonDelightPlugin : Plugin<Project> {
         })
 
         variants.all { variant ->
+            val buildDirectory = listOf("generated", "source", "jsonDelight", variant.name).fold(project.buildDir, ::File)
             val taskName = "generate${variant.name.capitalize()}JsonDelightModel"
             val taskProvider = project.tasks.register(taskName, JsonDelightTask::class.java) { task ->
                 val extension = project.extensions.getByType(JsonDelightExtension::class.java)
                 task.createSerializerByDefault = extension.createSerializerByDefault
                 task.createDeserializerByDefault = extension.createDeserializerByDefault
                 task.group = "jsondelightmodel"
-                task.outputDirectory = listOf("generated", "source", "jsonDelight", variant.name).fold(project.buildDir, ::File)
+                task.outputDirectory = buildDirectory
                 task.description = "Generate Json Delight Models and Factories for ${variant.name}"
                 task.source(variant.sourceSets.map { sourceSet -> "src/${sourceSet.name}/jsonDelight" })
                 task.include("**/*.json")
             }
 
             // TODO: https://issuetracker.google.com/issues/117343589
-            variant.registerJavaGeneratingTask(taskProvider.get(), taskProvider.get().outputDirectory)
+            variant.registerJavaGeneratingTask(taskProvider.get(), buildDirectory)
         }
     }
 
