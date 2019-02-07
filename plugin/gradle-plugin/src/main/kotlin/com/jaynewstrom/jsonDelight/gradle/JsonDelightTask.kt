@@ -18,15 +18,12 @@ import java.io.File
 @CacheableTask
 open class JsonDelightTask : SourceTask() {
     @Suppress("unused") // Required to invalidate the task on version updates.
-    @Input fun pluginVersion() = VERSION
+    @Input internal fun pluginVersion() = VERSION
 
-    @Input
-    var createSerializerByDefault = false
-    @Input
-    var createDeserializerByDefault = false
+    @Input internal var createSerializerByDefault = false
+    @Input internal var createDeserializerByDefault = false
 
-    @get:OutputDirectory
-    lateinit var outputDirectory: File
+    @get:OutputDirectory internal lateinit var outputDirectory: File
 
     @PathSensitive(PathSensitivity.RELATIVE)
     override fun getSource(): FileTree {
