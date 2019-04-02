@@ -5,6 +5,7 @@ dependencies {
     compileOnly gradleApi()
     compile dep.kotlinStdLibJdk8
     compile dep.androidPlugin
+    compile dep.kotlinGradlePlugin
     compile project(':compiler')
 }
 
