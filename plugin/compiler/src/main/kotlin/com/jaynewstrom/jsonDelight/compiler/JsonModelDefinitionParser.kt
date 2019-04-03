@@ -38,7 +38,7 @@ data class JsonModelDefinitionParser(
         val typeName = fieldJson.get("type").asText()
         val isList = fieldJson.getBooleanOrDefault("list", false)
         val primitiveType = PrimitiveType.fromIdentifier(typeName)
-        var kotlinType: TypeName = primitiveType?.kotlinTypeName ?: ClassName.bestGuess(typeName)
+        var kotlinType: TypeName = primitiveType?.kotlinTypeName ?: typeName.guessClassName()
         if (isList) {
             kotlinType = List::class.asClassName().parameterizedBy(kotlinType)
         }
@@ -48,11 +48,11 @@ data class JsonModelDefinitionParser(
         }
         var customSerializer: TypeName? = null
         if (fieldJson.hasNonNull("customSerializer")) {
-            customSerializer = ClassName.bestGuess(fieldJson.get("customSerializer").asText())
+            customSerializer = fieldJson.get("customSerializer").asText().guessClassName()
         }
         var customDeserializer: TypeName? = null
         if (fieldJson.hasNonNull("customDeserializer")) {
-            customDeserializer = ClassName.bestGuess(fieldJson.get("customDeserializer").asText())
+            customDeserializer = fieldJson.get("customDeserializer").asText().guessClassName()
         }
         onlyContains(fieldJson, supportedFieldNames(), "field")
         return FieldDefinition(isPublic, kotlinType, primitiveType, fieldName, jsonName, customSerializer, customDeserializer)
@@ -76,5 +76,13 @@ data class JsonModelDefinitionParser(
 
     private fun supportedFieldNames(): Set<String> {
         return setOf("public", "name", "jsonName", "type", "list", "nullable", "customSerializer", "customDeserializer")
+    }
+
+    private fun String.guessClassName(): ClassName {
+        return if (contains('.')) {
+            ClassName.bestGuess(this)
+        } else {
+            ClassName(packageName, this)
+        }
     }
 }

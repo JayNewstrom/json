@@ -18,15 +18,16 @@ import java.io.IOException
 
 internal data class ModelDeserializerBuilder(
     private val isPublic: Boolean,
+    private val packageName: String,
     private val name: String,
     private val fields: List<FieldDefinition>
 ) {
     fun build(): TypeSpec {
         val jsonDeserializerType = JsonDeserializer::class.asTypeName()
         val typeBuilder = TypeSpec.classBuilder(JsonCompiler.deserializerName(name))
-            .addSuperinterface(jsonDeserializerType.parameterizedBy(JsonCompiler.jsonModelType(name)))
+            .addSuperinterface(jsonDeserializerType.parameterizedBy(JsonCompiler.jsonModelType(packageName, name)))
             .addSuperinterface(JsonRegistrable::class)
-            .addFunction(JsonCompiler.modelClassFunSpec(name))
+            .addFunction(JsonCompiler.modelClassFunSpec(packageName, name))
             .addFunction(deserializeMethodSpec())
         if (!isPublic) {
             typeBuilder.addModifiers(KModifier.INTERNAL)
@@ -38,7 +39,7 @@ internal data class ModelDeserializerBuilder(
         val methodBuilder = FunSpec.builder("deserialize")
             .addAnnotation(JsonCompiler.throwsIoExceptionAnnotation())
             .addModifiers(KModifier.OVERRIDE)
-            .returns(JsonCompiler.jsonModelType(name))
+            .returns(JsonCompiler.jsonModelType(packageName, name))
             .addParameter(ParameterSpec.builder(JSON_PARSER_VARIABLE_NAME, JsonParser::class).build())
             .addParameter(ParameterSpec.builder(DESERIALIZER_FACTORY_VARIABLE_NAME, JsonDeserializerFactory::class.java).build())
         deserializeMethodBody(methodBuilder)

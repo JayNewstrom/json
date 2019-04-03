@@ -16,15 +16,16 @@ import com.squareup.kotlinpoet.asTypeName
 
 internal data class ModelSerializerBuilder(
     private val isPublic: Boolean,
+    private val packageName: String,
     private val name: String,
     private val fields: List<FieldDefinition>
 ) {
     fun build(): TypeSpec {
         val jsonFactoryType = JsonSerializer::class.asTypeName()
         val typeBuilder = TypeSpec.classBuilder(JsonCompiler.serializerName(name))
-            .addSuperinterface(jsonFactoryType.parameterizedBy(JsonCompiler.jsonModelType(name)))
+            .addSuperinterface(jsonFactoryType.parameterizedBy(JsonCompiler.jsonModelType(packageName, name)))
             .addSuperinterface(JsonRegistrable::class.java)
-            .addFunction(JsonCompiler.modelClassFunSpec(name))
+            .addFunction(JsonCompiler.modelClassFunSpec(packageName, name))
             .addFunction(serializeFunSpec())
         if (!isPublic) {
             typeBuilder.addModifiers(KModifier.INTERNAL)
@@ -36,7 +37,7 @@ internal data class ModelSerializerBuilder(
         val methodBuilder = FunSpec.builder("serialize")
             .addAnnotation(JsonCompiler.throwsIoExceptionAnnotation())
             .addModifiers(KModifier.OVERRIDE)
-            .addParameter(ParameterSpec.builder(MODEL_VARIABLE_NAME, JsonCompiler.jsonModelType(name)).build())
+            .addParameter(ParameterSpec.builder(MODEL_VARIABLE_NAME, JsonCompiler.jsonModelType(packageName, name)).build())
             .addParameter(ParameterSpec.builder(JSON_GENERATOR_VARIABLE_NAME, JsonGenerator::class).build())
             .addParameter(ParameterSpec.builder(SERIALIZER_FACTORY_VARIABLE_NAME, JsonSerializerFactory::class).build())
         serializeMethodBody(methodBuilder)

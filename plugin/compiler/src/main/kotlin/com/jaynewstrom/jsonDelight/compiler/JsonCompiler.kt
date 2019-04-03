@@ -19,15 +19,15 @@ internal object JsonCompiler {
         return file.name.substring(0, file.name.indexOf(file.extension) - 1)
     }
 
-    fun jsonModelType(modelName: String): ClassName {
-        return ClassName.bestGuess(modelName)
+    fun jsonModelType(packageName: String, modelName: String): ClassName {
+        return ClassName(packageName, modelName)
     }
 
-    fun modelClassFunSpec(modelName: String): FunSpec {
+    fun modelClassFunSpec(packageName: String, modelName: String): FunSpec {
         return FunSpec.builder("modelClass")
             .addModifiers(KModifier.OVERRIDE)
             .returns(Class::class.asClassName().parameterizedBy(STAR))
-            .addStatement("return %T::class.java", jsonModelType(modelName))
+            .addStatement("return %T::class.java", jsonModelType(packageName, modelName))
             .build()
     }
 

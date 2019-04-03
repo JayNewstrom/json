@@ -20,10 +20,10 @@ data class ModelDefinition internal constructor(
         val typeBuilder = FileSpec.builder(packageName, name)
         typeBuilder.addType(ModelBuilder(this).build())
         if (createSerializer) {
-            typeBuilder.addType(ModelSerializerBuilder(isPublic, name, fields).build())
+            typeBuilder.addType(ModelSerializerBuilder(isPublic, packageName, name, fields).build())
         }
         if (createDeserializer) {
-            typeBuilder.addType(ModelDeserializerBuilder(isPublic, name, fields).build())
+            typeBuilder.addType(ModelDeserializerBuilder(isPublic, packageName, name, fields).build())
         }
         typeBuilder.build().writeTo(outputDirectory)
     }
